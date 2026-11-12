@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it and the WHO publications it implements.
+title: '@hisprwanda/who-labour'
+abstract: WHO labour monitoring for JavaScript and TypeScript, starting with the WHO modified partograph.
+type: software
+authors:
+  - name: HISP Rwanda
+license: Apache-2.0
+repository-code: https://github.com/hisprwanda/who-labour
+keywords:
+  - WHO
+  - partograph
+  - labour care guide
+  - intrapartum care
+references:
+  - type: report
+    title: 'The partograph: the application of the WHO partograph in the management of labour'
+    authors:
+      - name: World Health Organization
+    publisher:
+      name: World Health Organization
+    year: 1994
+  - type: book
+    title: 'Managing complications in pregnancy and childbirth: a guide for midwives and doctors'
+    authors:
+      - name: World Health Organization
+    publisher:
+      name: World Health Organization
+    edition: '2nd'
+    year: 2017
+  - type: manual
+    title: "WHO labour care guide: user's manual"
+    authors:
+      - name: World Health Organization
+    publisher:
+      name: World Health Organization
+    year: 2020
