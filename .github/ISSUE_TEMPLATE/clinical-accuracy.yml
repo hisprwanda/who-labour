@@ -1,0 +1,33 @@
+name: Clinical accuracy
+description: A finding, zone or due time differs from WHO guidance.
+labels: [accuracy]
+body:
+  - type: markdown
+    attributes:
+      value: If this could affect patient care and is not yet public, report it privately through the security policy instead.
+  - type: textarea
+    id: input
+    attributes:
+      label: Readings
+      description: The readings, `now` and any rule overrides you passed.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Result from this package
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result and its source
+      description: WHO document, edition and page.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+    validations:
+      required: true
