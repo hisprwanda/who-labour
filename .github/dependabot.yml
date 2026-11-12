@@ -10,6 +10,9 @@ updates:
     commit-message:
       prefix: build
       include: scope
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
     groups:
       development:
         dependency-type: development
