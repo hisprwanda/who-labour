@@ -1,0 +1,103 @@
+{
+  "name": "@hisprwanda/who-labour",
+  "version": "0.0.0",
+  "description": "WHO labour monitoring for JavaScript and TypeScript: the WHO modified partograph with alert and action lines, findings and due checks. The WHO Labour Care Guide is planned.",
+  "keywords": [
+    "who",
+    "partograph",
+    "labour",
+    "labor",
+    "labour-care-guide",
+    "obstetrics",
+    "maternal-health",
+    "intrapartum",
+    "cervicograph",
+    "midwifery"
+  ],
+  "homepage": "https://github.com/hisprwanda/who-labour#readme",
+  "bugs": {
+    "url": "https://github.com/hisprwanda/who-labour/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hisprwanda/who-labour.git"
+  },
+  "license": "Apache-2.0",
+  "author": "HISP Rwanda",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.cts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./partograph": {
+      "import": {
+        "types": "./dist/partograph.d.ts",
+        "default": "./dist/partograph.js"
+      },
+      "require": {
+        "types": "./dist/partograph.d.cts",
+        "default": "./dist/partograph.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "files": [
+    "dist",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "check:package": "publint --strict && attw --pack . --profile node16",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tools.json",
+    "verify": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test:coverage && pnpm build && pnpm check:package"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.0",
+    "eslint": "10.14.0",
+    "fast-check": "4.10.2",
+    "prettier": "3.9.10",
+    "publint": "0.3.25",
+    "tsdown": "0.23.4",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
