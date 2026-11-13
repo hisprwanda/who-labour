@@ -63,19 +63,50 @@ describe('buildPartograph scenarios', () => {
     ]);
   });
 
-  it('starts the lines at the admission dilatation when admitted at 7 cm', () => {
+  it('keeps the printed lines and plots a 7 cm admission on the alert line', () => {
     const partograph = started(
       buildPartograph({ readings: [cervix(0, 7), cervix(2, 8)], now: hour(2) }),
     );
     expect(partograph.alertLine).toEqual({
-      start: { hour: 0, dilatationCm: 7 },
-      end: { hour: 3, dilatationCm: 10 },
+      start: { hour: 0, dilatationCm: 4 },
+      end: { hour: 6, dilatationCm: 10 },
     });
-    expect(partograph.actionLine.start).toEqual({ hour: 4, dilatationCm: 7 });
-    expect(partograph.cervix.map((point) => point.zone)).toEqual([
-      'left-of-alert-line',
-      'between-lines',
+    expect(partograph.actionLine).toEqual({
+      start: { hour: 4, dilatationCm: 4 },
+      end: { hour: 10, dilatationCm: 10 },
+    });
+    expect(partograph.startedAt).toBe(hour(0));
+    expect(partograph.cervix.map(({ hour: at, column, zone }) => [at, column, zone])).toEqual([
+      [3, 6, 'left-of-alert-line'],
+      [5, 10, 'between-lines'],
     ]);
+    expect(partograph.grid.columns[6]).toEqual({ index: 6, hour: 3, from: hour(0), to: hour(0.5) });
+    expect(partograph.progress).toMatchObject({
+      alertLineReachedAt: hour(1),
+      actionLineReachedAt: hour(5),
+    });
+  });
+
+  it('plots an admission between whole centimetres on the alert line', () => {
+    const partograph = started(
+      buildPartograph({ readings: [cervix(0, 5.5), cervix(4, 7.5)], now: hour(4) }),
+    );
+    expect(partograph.cervix.map(({ hour: at, zone }) => [at, zone])).toEqual([
+      [1.5, 'left-of-alert-line'],
+      [5.5, 'between-lines'],
+    ]);
+  });
+
+  it('starts the lines from an overridden active phase', () => {
+    const partograph = started(
+      buildPartograph({
+        readings: [cervix(0, 6), cervix(1, 7)],
+        now: hour(1),
+        rules: { cervix: { activePhaseFromCm: 5 } },
+      }),
+    );
+    expect(partograph.alertLine.start).toEqual({ hour: 0, dilatationCm: 5 });
+    expect(partograph.cervix.map((point) => point.hour)).toEqual([1, 2]);
   });
 
   it('does not start before the active phase', () => {

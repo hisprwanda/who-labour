@@ -107,7 +107,9 @@ export function buildPartograph(input: PartographInput): Partograph {
   if (start === undefined) return { status: 'not-started', issues: normalized.issues };
 
   const startedAt = start.time;
-  const startCm = start.dilatationCm;
+  const chartStart = Math.round(
+    startedAt - alertLineHourAt(start.dilatationCm, cervixRules) * MS_PER_HOUR,
+  );
   const charted = normalized.readings.filter((reading) => reading.time >= startedAt);
   const issues: ReadingIssue[] = [
     ...normalized.issues,
@@ -125,15 +127,15 @@ export function buildPartograph(input: PartographInput): Partograph {
     (reading) => reading.dilatationCm >= cervixRules.fullDilatationCm,
   );
   const chartedReadings = charted.map((reading) =>
-    chartReading(reading, startedAt, rules.chart.columnMinutes),
+    chartReading(reading, chartStart, rules.chart.columnMinutes),
   );
   const cervix: CervixPoint[] = chartedReadings
     .filter((reading): reading is ChartedReading<CervixReading> => reading.kind === 'cervix')
-    .map((point) => ({ ...point, zone: cervixZone(point, startCm, cervixRules) }));
+    .map((point) => ({ ...point, zone: cervixZone(point, cervixRules) }));
 
   const findings = [
     ...charted.flatMap((reading) => {
-      const placed = chartReading(reading, startedAt, rules.chart.columnMinutes);
+      const placed = chartReading(reading, chartStart, rules.chart.columnMinutes);
       return assess(reading, charted, rules).map((assessment) => finding(assessment, placed));
     }),
     ...lineFindings(cervix),
@@ -148,15 +150,14 @@ export function buildPartograph(input: PartographInput): Partograph {
           dilatationCm: latest.dilatationCm,
           zone: latest.zone,
           zoneNow: cervixZone(
-            { hour: hoursBetween(startedAt, now), dilatationCm: latest.dilatationCm },
-            startCm,
+            { hour: hoursBetween(chartStart, now), dilatationCm: latest.dilatationCm },
             cervixRules,
           ),
           alertLineReachedAt: toIsoString(
-            startedAt + alertLineHourAt(latest.dilatationCm, startCm, cervixRules) * MS_PER_HOUR,
+            chartStart + alertLineHourAt(latest.dilatationCm, cervixRules) * MS_PER_HOUR,
           ),
           actionLineReachedAt: toIsoString(
-            startedAt + actionLineHourAt(latest.dilatationCm, startCm, cervixRules) * MS_PER_HOUR,
+            chartStart + actionLineHourAt(latest.dilatationCm, cervixRules) * MS_PER_HOUR,
           ),
         };
 
@@ -165,11 +166,11 @@ export function buildPartograph(input: PartographInput): Partograph {
     startedAt: start.at,
     fullyDilatedAt: fullyDilated?.at ?? null,
     now: toIsoString(now),
-    alertLine: alertLine(startCm, cervixRules),
-    actionLine: actionLine(startCm, cervixRules),
+    alertLine: alertLine(cervixRules),
+    actionLine: actionLine(cervixRules),
     cervix,
     progress,
-    grid: buildGrid(chartedReadings, startedAt, rules.chart),
+    grid: buildGrid(chartedReadings, chartStart, rules.chart),
     findings,
     due: dueChecks({
       readings: charted,

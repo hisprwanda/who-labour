@@ -22,21 +22,21 @@ const ROW_ORDER: readonly ReadingKind[] = [
 /** Places a reading on the chart, dropping its epoch time. */
 export function chartReading(
   reading: TimedReading,
-  startedAt: number,
+  chartStart: number,
   columnMinutes: number,
 ): ChartedReading {
   const { time, index, ...rest } = reading;
   return {
     ...rest,
-    hour: hoursBetween(startedAt, time),
-    column: Math.floor((time - startedAt) / (columnMinutes * MS_PER_MINUTE)),
+    hour: hoursBetween(chartStart, time),
+    column: Math.floor((time - chartStart) / (columnMinutes * MS_PER_MINUTE)),
   };
 }
 
 /** Time columns covering at least the minimum chart length and every reading, with readings by row. */
 export function buildGrid(
   readings: readonly ChartedReading[],
-  startedAt: number,
+  chartStart: number,
   rules: ChartRules,
 ): PartographGrid {
   const minimumColumns = Math.ceil((rules.minimumHours * 60) / rules.columnMinutes);
@@ -47,8 +47,8 @@ export function buildGrid(
     (_, index) => ({
       index,
       hour: (index * rules.columnMinutes) / 60,
-      from: toIsoString(startedAt + index * columnMs),
-      to: toIsoString(startedAt + (index + 1) * columnMs),
+      from: toIsoString(chartStart + index * columnMs),
+      to: toIsoString(chartStart + (index + 1) * columnMs),
     }),
   );
   const rows = Object.fromEntries(

@@ -50,17 +50,20 @@ if (partograph.status !== 'not-started') {
    after `now`, or an exact duplicate are left out and listed in `issues` with their input index.
    Bad clinical data never throws; only programmer errors (an invalid `now` or invalid rules) throw
    a `TypeError`.
-3. **Start of the chart.** The partograph starts at the first cervix reading of 4 cm or more. If the
-   woman is admitted further on, the lines start at her dilatation on admission. Readings taken
-   before that are listed as `before-start`. Until then the result is `{ status: 'not-started' }`.
-4. **Lines and zones.** The alert line rises 1 cm per hour to 10 cm and the action line runs 4 hours
-   to its right. Every cervix point gets a zone: `left-of-alert-line` (on the line counts as
+3. **Start of the chart.** The partograph starts at the first cervix reading of 4 cm or more.
+   Readings taken before that are listed as `before-start`. Until then the result is
+   `{ status: 'not-started' }`.
+4. **Lines and zones.** The lines are fixed, as on the printed chart: the alert line rises 1 cm per
+   hour from 4 cm at hour 0 to 10 cm, and the action line runs 4 hours to its right. The first
+   active-phase exam is plotted on the alert line, so a woman admitted at 7 cm starts at hour 3 and
+   the columns before it stay empty. Every reading's `hour` and `column` count from the alert
+   line's start, not from admission. Every cervix point gets a zone: `left-of-alert-line` (on the line counts as
    left), `between-lines` or `right-of-action-line` (on the line counts as right).
 5. **Findings.** Each reading is checked against the rules below. Severity is `watch` (reassess,
    consider referral) or `urgent` (act now).
 6. **Due checks.** For each routine check: when it was last done, when it is next due and how many
    minutes late it is. Once fully dilated, second-stage intervals apply.
-7. **Grid.** Half-hour columns from the start of the active phase, at least 12 hours long, with
+7. **Grid.** Half-hour columns from the alert line's start, at least 12 hours long, with
    every reading placed in its row and column.
 
 ## Readings

@@ -1,6 +1,6 @@
 import type { CervixRules } from './rules.js';
 
-/** A point on the cervicograph: hours since the active phase started, and dilatation. */
+/** A point on the cervicograph: hours on the chart, where the alert line starts at hour 0, and dilatation. */
 export interface ChartPoint {
   readonly hour: number;
   readonly dilatationCm: number;
@@ -17,40 +17,33 @@ export type CervixZone = 'left-of-alert-line' | 'between-lines' | 'right-of-acti
 
 const EPSILON = 1e-9;
 
-/** Hour at which the alert line reaches a dilatation, given the dilatation it started from. */
-export function alertLineHourAt(
-  dilatationCm: number,
-  startDilatationCm: number,
-  rules: CervixRules,
-): number {
+/** Hour at which the alert line reaches a dilatation; the line starts at the active phase at hour 0. */
+export function alertLineHourAt(dilatationCm: number, rules: CervixRules): number {
   return (
-    (Math.min(dilatationCm, rules.fullDilatationCm) - startDilatationCm) / rules.alertLineCmPerHour
+    (Math.min(dilatationCm, rules.fullDilatationCm) - rules.activePhaseFromCm) /
+    rules.alertLineCmPerHour
   );
 }
 
-/** Hour at which the action line reaches a dilatation, given the dilatation the alert line started from. */
-export function actionLineHourAt(
-  dilatationCm: number,
-  startDilatationCm: number,
-  rules: CervixRules,
-): number {
-  return alertLineHourAt(dilatationCm, startDilatationCm, rules) + rules.actionLineAfterHours;
+/** Hour at which the action line reaches a dilatation. */
+export function actionLineHourAt(dilatationCm: number, rules: CervixRules): number {
+  return alertLineHourAt(dilatationCm, rules) + rules.actionLineAfterHours;
 }
 
-/** The alert line, starting at the first active-phase dilatation and rising to full dilatation. */
-export function alertLine(startDilatationCm: number, rules: CervixRules): DilatationLine {
+/** The printed alert line, from the active phase at hour 0 up to full dilatation. */
+export function alertLine(rules: CervixRules): DilatationLine {
   return {
-    start: { hour: 0, dilatationCm: startDilatationCm },
+    start: { hour: 0, dilatationCm: rules.activePhaseFromCm },
     end: {
-      hour: alertLineHourAt(rules.fullDilatationCm, startDilatationCm, rules),
+      hour: alertLineHourAt(rules.fullDilatationCm, rules),
       dilatationCm: rules.fullDilatationCm,
     },
   };
 }
 
-/** The action line, parallel to the alert line and shifted right. */
-export function actionLine(startDilatationCm: number, rules: CervixRules): DilatationLine {
-  const alert = alertLine(startDilatationCm, rules);
+/** The printed action line, parallel to the alert line and shifted right. */
+export function actionLine(rules: CervixRules): DilatationLine {
+  const alert = alertLine(rules);
   return {
     start: { ...alert.start, hour: alert.start.hour + rules.actionLineAfterHours },
     end: { ...alert.end, hour: alert.end.hour + rules.actionLineAfterHours },
@@ -58,12 +51,8 @@ export function actionLine(startDilatationCm: number, rules: CervixRules): Dilat
 }
 
 /** Which side of the alert and action lines a cervix point falls on. */
-export function cervixZone(
-  point: ChartPoint,
-  startDilatationCm: number,
-  rules: CervixRules,
-): CervixZone {
-  const alertHour = alertLineHourAt(point.dilatationCm, startDilatationCm, rules);
+export function cervixZone(point: ChartPoint, rules: CervixRules): CervixZone {
+  const alertHour = alertLineHourAt(point.dilatationCm, rules);
   if (point.hour <= alertHour + EPSILON) return 'left-of-alert-line';
   if (point.hour >= alertHour + rules.actionLineAfterHours - EPSILON) return 'right-of-action-line';
   return 'between-lines';
