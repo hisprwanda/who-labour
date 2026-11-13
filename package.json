@@ -1,7 +1,7 @@
 {
   "name": "@hisprwanda/who-labour",
   "version": "0.0.0",
-  "description": "WHO labour monitoring for JavaScript and TypeScript: the WHO modified partograph with alert and action lines, findings and due checks. The WHO Labour Care Guide is planned.",
+  "description": "WHO labour monitoring for JavaScript and TypeScript: the WHO modified partograph with alert and action lines, and the WHO Labour Care Guide with time limits per centimetre, findings and due checks.",
   "keywords": [
     "who",
     "partograph",
@@ -55,6 +55,16 @@
       "require": {
         "types": "./dist/partograph.d.cts",
         "default": "./dist/partograph.cjs"
+      }
+    },
+    "./lcg": {
+      "import": {
+        "types": "./dist/lcg.d.ts",
+        "default": "./dist/lcg.js"
+      },
+      "require": {
+        "types": "./dist/lcg.d.cts",
+        "default": "./dist/lcg.cjs"
       }
     },
     "./package.json": "./package.json"

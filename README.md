@@ -1,9 +1,12 @@
 # @hisprwanda/who-labour
 
-WHO labour monitoring for JavaScript and TypeScript. Version 0.x covers the **WHO modified
-partograph**: the cervicograph with its alert and action lines, findings for abnormal readings, and
-which routine checks are due. Support for the **WHO Labour Care Guide** (LCG) is planned as a second
-entry point in the same package.
+WHO labour monitoring for JavaScript and TypeScript, with two tools built on the same readings:
+
+- the **WHO modified partograph**: the cervicograph with its alert and action lines, findings for
+  abnormal readings, and which routine checks are due
+- the **WHO Labour Care Guide** (LCG, 2020): active labour from 5 cm, a time limit for each
+  centimetre instead of alert and action lines, a second-stage limit by parity, supportive care and
+  the guide's alert values
 
 - Pure functions, no I/O and no runtime dependencies
 - ESM and CommonJS, with types
@@ -42,6 +45,27 @@ if (partograph.status !== 'not-started') {
 }
 ```
 
+### Labour Care Guide
+
+```ts
+import { buildLabourCareGuide } from '@hisprwanda/who-labour/lcg';
+
+const guide = buildLabourCareGuide({
+  parity: 0,
+  now: '2026-01-10T15:00:00Z',
+  readings: [
+    { kind: 'cervix', at: '2026-01-10T08:00:00Z', dilatationCm: 5 },
+    { kind: 'cervix', at: '2026-01-10T12:00:00Z', dilatationCm: 7 },
+    { kind: 'companion', at: '2026-01-10T12:00:00Z', given: 'no' },
+  ],
+});
+
+if (guide.status !== 'not-started') {
+  guide.progress; // { dilatationCm: 7, hours: 3, limitHours: 3, delayed: true, ... }
+  guide.findings.map((finding) => finding.code); // ['companion-absent', 'cervix-progress-delayed']
+}
+```
+
 ## How it works
 
 1. **Readings in.** Each observation is one reading with a `kind`, a time `at` and its values. An
@@ -66,6 +90,35 @@ if (partograph.status !== 'not-started') {
 7. **Grid.** Half-hour columns from the alert line's start, at least 12 hours long, with
    every reading placed in its row and column.
 
+### Labour Care Guide
+
+Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
+
+- **Start.** Active labour starts at the first cervix reading of 5 cm or more. Every `hour` counts
+  from that exam.
+- **Time at each centimetre.** For each whole centimetre examined, `cervix` lists when it was
+  reached, when it was left, the hours spent there and its limit (6, 5, 3, 2.5 and 2 hours at 5 to 9
+  cm). A later exam that reads lower never resets the clock. When the limit is reached,
+  `cervix-progress-delayed` is reported at the moment the limit passed, even before the next exam,
+  so a board can show it at `now`. `progress` is the current centimetre, or `null` once fully
+  dilated.
+- **Second stage.** It starts at the first 10 cm reading. `second-stage-prolonged` is reported after
+  3 hours for a nulliparous woman (`parity: 0`) and 2 hours otherwise. A missing or invalid parity
+  uses the stricter 2 hours.
+- **Episode facts.** `parity`, `labourOnsetAt`, `membranesRupturedAt`, `riskFactors`, `pushingAt`
+  and `birthAt` are optional and go into `header`. An invalid or future value becomes `null`; it
+  never throws. `pushingAt` (the form's `P`) is also shown in `secondStage` and raises no alert.
+  `birthAt` stops the clocks and the due checks.
+- **Grid.** `grid.firstStage` has hourly columns from the start, at least 12 hours long, as on the
+  printed form. Each reading keeps its exact `hour`, so the two half-hourly fetal heart rates of an
+  hour share its column. `grid.secondStage` has hourly columns from full dilatation, at least 3
+  hours long, as on the form. Rows are grouped by section: `supportiveCare`, `baby`, `woman`, `progress` and
+  `medication`.
+- **Shared decision-making is not modelled.** Section 7 of the guide (assessment, plan and the
+  midwife's initials) is free-text clinical judgement with an author. It produces no computed
+  finding, so it belongs in the health record next to the guide, where it can be written, signed
+  and audited, rather than in this library.
+
 ## Readings
 
 | `kind`             | Values                                                                      |
@@ -83,6 +136,18 @@ if (partograph.status !== 'not-started') {
 | `blood-pressure`   | `systolic`, `diastolic` in mmHg                                             |
 | `temperature`      | `celsius`                                                                   |
 | `urine`            | at least one of `protein` and `acetone` (dipstick 0 to 4), `volumeMl`       |
+| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it), `unknown`    |
+| `pain-relief`      | `given`: `yes`, `no`, `declined`, `unknown`                                 |
+| `oral-fluid`       | `given`: `yes`, `no`, `declined`, `unknown`                                 |
+| `posture`          | `position`: `supine`, `mobile`                                              |
+| `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                 |
+| `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                           |
+| `caput`            | `grade`: 0 none, 1 +, 2 ++, 3 +++                                           |
+
+`amniotic-fluid` also takes an optional `meconiumGrade` (1 to 3, for M+ to M+++) when the state is
+`meconium`. The partograph accepts every kind and charts the Labour Care Guide ones without
+findings. The Labour Care Guide does not flag `absent` liquor, because its alert column lists only
+M+++ and blood; the partograph still does.
 
 Times are a `Date`, epoch milliseconds or an ISO 8601 string with `Z` or an offset. A string without
 a zone is rejected, because its meaning depends on the device it runs on.
@@ -103,27 +168,60 @@ WHO Labour Care Guide and the emergency values of MCPC.
 | Temperature              | every 2 h                                                       | WHO 1994            |
 | Blood pressure           | every 4 h                                                       | WHO 1994            |
 | Vaginal exam             | every 4 h in the first stage                                    | WHO 1994            |
-| Fetal heart rate, watch  | below 110 or 160 and above                                      | LCG 2020            |
+| Fetal heart rate, watch  | below 110 or 160 and above                                      | LCG 2021            |
 | Fetal heart rate, urgent | below 100 or above 180                                          | MCPC 2017           |
 | Liquor                   | meconium, blood-stained or absent                               | WHO 1994            |
-| Moulding                 | grade 3 (+++)                                                   | WHO 1994, LCG 2020  |
+| Moulding                 | grade 3 (+++)                                                   | WHO 1994, LCG 2021  |
 | Contractions, inadequate | fewer than 3 in 10 min, or 40 s or less                         | MCPC 2017           |
-| Contractions, excessive  | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs | LCG 2020, MCPC 2017 |
-| Pulse                    | below 60 or 120 and above                                       | LCG 2020            |
-| Blood pressure, watch    | systolic below 80 or 140 and above, diastolic 90 and above      | LCG 2020            |
+| Contractions, excessive  | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs | LCG 2021, MCPC 2017 |
+| Pulse                    | below 60 or 120 and above                                       | LCG 2021            |
+| Blood pressure, watch    | systolic below 80 or 140 and above, diastolic 90 and above      | LCG 2021            |
 | Blood pressure, urgent   | systolic 160 and above or diastolic 110 and above               | MCPC 2017           |
-| Temperature              | below 35.0 or 37.5 and above °C                                 | LCG 2020            |
-| Urine                    | protein or acetone ++ and above                                 | LCG 2020            |
+| Temperature              | below 35.0 or 37.5 and above °C                                 | LCG 2021            |
+| Urine                    | protein or acetone ++ and above                                 | LCG 2021            |
 
 - **WHO 1994:** World Health Organization. _The partograph: the application of the WHO partograph in
   the management of labour._ WHO/FHE/MSM/93.8. Geneva: WHO; 1994.
 - **MCPC 2017:** World Health Organization. _Managing complications in pregnancy and childbirth: a
   guide for midwives and doctors._ 2nd ed. Geneva: WHO; 2017.
-- **LCG 2020:** World Health Organization. _WHO labour care guide: user's manual._ Geneva: WHO; 2020.
+- **LCG 2021:** World Health Organization. _WHO labour care guide_ (form). Geneva: WHO; 2021.
+- **LCG manual 2020:** World Health Organization. _WHO labour care guide: user's manual._ Geneva:
+  WHO; 2020. Used only for what the form does not print.
 
 The values above were transcribed by hand and must be checked against the documents by a
 clinician before the first release. Please report any difference with the "Clinical accuracy" issue
 template.
+
+### Labour Care Guide rules
+
+All defaults live in `WHO_LABOUR_CARE_GUIDE_RULES` and are overridden the same way as the
+partograph's. The alert values, the centimetre limits and the layout match the 2021 form. The
+second-stage limits and the 4-hourly checks are not on the form; they come from the user's manual
+and must be checked by a clinician before the first release.
+
+| Rule                     | Default                                                                | Source                    |
+| ------------------------ | ---------------------------------------------------------------------- | ------------------------- |
+| Active labour starts     | 5 cm                                                                   | LCG 2021                  |
+| Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h                | LCG 2021                  |
+| Second stage             | 3 h nulliparous, 2 h multiparous                                       | LCG manual 2020           |
+| Fetal heart rate         | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
+| Decelerations            | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
+| Contractions             | every 30 min                                                           | LCG 2021                  |
+| Pulse, supportive care   | every hour                                                             | LCG 2021                  |
+| Temperature, BP          | every 4 h                                                              | LCG manual 2020           |
+| Vaginal exam             | every 4 h in the first stage                                           | LCG manual 2020           |
+| Supportive care          | companion, pain relief or oral fluid `no`, not `declined` or `unknown` | LCG 2021                  |
+| Posture                  | supine                                                                 | LCG 2021                  |
+| Fetal heart rate, watch  | below 110 or 160 and above                                             | LCG 2021                  |
+| Fetal heart rate, urgent | below 100 or above 180                                                 | MCPC 2017                 |
+| Decelerations            | late                                                                   | LCG 2021                  |
+| Liquor                   | meconium +++ (or ungraded) or blood-stained                            | LCG 2021                  |
+| Fetal position           | posterior or transverse                                                | LCG 2021                  |
+| Caput, moulding          | +++                                                                    | LCG 2021                  |
+| Contractions, too few    | 2 or fewer in 10 min, or under 20 s                                    | LCG 2021                  |
+| Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs        | LCG 2021, MCPC 2017       |
+| Pulse, BP, temperature   | as for the partograph                                                  | LCG 2021, MCPC 2017       |
+| Urine                    | protein or acetone ++ and above                                        | LCG 2021                  |
 
 ### Local protocols
 
@@ -144,11 +242,12 @@ Use `null` to stop scheduling a check. Invalid values throw a `TypeError`.
 
 ## API
 
-| Entry point                         | Exports                                                                                                                                                                                                                                                                        |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@hisprwanda/who-labour/partograph` | `buildPartograph`, `WHO_MODIFIED_PARTOGRAPH_RULES`, `resolvePartographRules`, `alertLine`, `actionLine`, `alertLineHourAt`, `actionLineHourAt`, `cervixZone`, `dueChecks`                                                                                                      |
-| `@hisprwanda/who-labour/core`       | `normalizeReadings`, `parseInstant`, `hoursBetween`, `toIsoString`, `classifyFetalHeartRate`, `classifyAmnioticFluid`, `classifyMoulding`, `classifyContractions`, `contractionDurationBand`, `classifyPulse`, `classifyBloodPressure`, `classifyTemperature`, `classifyUrine` |
-| `@hisprwanda/who-labour`            | everything above                                                                                                                                                                                                                                                               |
+| Entry point                         | Exports                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@hisprwanda/who-labour/partograph` | `buildPartograph`, `WHO_MODIFIED_PARTOGRAPH_RULES`, `resolvePartographRules`, `alertLine`, `actionLine`, `alertLineHourAt`, `actionLineHourAt`, `cervixZone`, `dueChecks`                                                                                                                                                                                                                                                   |
+| `@hisprwanda/who-labour/lcg`        | `buildLabourCareGuide`, `WHO_LABOUR_CARE_GUIDE_RULES`, `resolveLabourCareGuideRules`                                                                                                                                                                                                                                                                                                                                        |
+| `@hisprwanda/who-labour/core`       | `normalizeReadings`, `parseInstant`, `hoursBetween`, `toIsoString`, `classifyFetalHeartRate`, `classifyAmnioticFluid`, `classifyMoulding`, `classifyCaput`, `classifyDecelerations`, `classifyFetalPosition`, `classifyContractions`, `classifyContractionAlerts`, `contractionDurationBand`, `classifyPulse`, `classifyBloodPressure`, `classifyTemperature`, `classifyUrine`, `classifySupportiveCare`, `classifyPosture` |
+| `@hisprwanda/who-labour`            | everything above                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 Every export has a one-line description in its type definitions.
 
@@ -160,10 +259,15 @@ Every export has a one-line description in its type definitions.
 `temperature-low`, `temperature-high`, `proteinuria`, `ketonuria`, `alert-line-crossed`,
 `action-line-crossed`.
 
+Labour Care Guide only: `companion-absent`, `pain-relief-absent`, `oral-fluid-absent`,
+`supine-posture`, `late-decelerations`, `fetal-position-abnormal`, `caput-severe`,
+`cervix-progress-delayed`, `second-stage-prolonged`.
+
 ## Roadmap
 
-- `@hisprwanda/who-labour/lcg`: the WHO Labour Care Guide (active phase from 5 cm, time limits per
-  centimetre, second-stage limits by parity, supportive care), built on the same readings.
+- Clinical review of every default in both rules tables.
+- API docs generated with TypeDoc.
+- WHO's worked examples as test scenarios.
 
 ## Contributing
 

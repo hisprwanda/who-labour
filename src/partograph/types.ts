@@ -1,12 +1,7 @@
-import type {
-  DistributiveOmit,
-  Finding,
-  Instant,
-  Reading,
-  ReadingIssue,
-  ReadingKind,
-  ReadingOfKind,
-} from '../core/types.js';
+import type { ChartedFinding, ChartedReading, GridColumn } from '../core/chart.js';
+import type { Instant, Reading, ReadingIssue, ReadingKind, ReadingOfKind } from '../core/types.js';
+export type { ChartedFinding, ChartedReading, GridColumn } from '../core/chart.js';
+import type { ScheduledCheck } from '../core/schedule.js';
 import type { CervixZone, DilatationLine } from './lines.js';
 import type { MonitoringCheck, PartographRuleOverrides } from './rules.js';
 
@@ -17,25 +12,8 @@ export interface PartographInput {
   readonly rules?: PartographRuleOverrides;
 }
 
-/** A reading placed on the chart: hours from the alert line's start, and its grid column. */
-export type ChartedReading<R extends Reading = Reading> = R extends Reading
-  ? DistributiveOmit<R, 'at'> & {
-      readonly at: string;
-      readonly hour: number;
-      readonly column: number;
-    }
-  : never;
-
 /** A cervix reading with the zone it falls in. */
 export type CervixPoint = ChartedReading<ReadingOfKind<'cervix'>> & { readonly zone: CervixZone };
-
-/** One time column of the chart. */
-export interface GridColumn {
-  readonly index: number;
-  readonly hour: number;
-  readonly from: string;
-  readonly to: string;
-}
 
 /** The chart's time columns and every reading grouped into its row. */
 export interface PartographGrid {
@@ -53,14 +31,8 @@ export interface CervixProgress {
   readonly actionLineReachedAt: string;
 }
 
-/** A routine check: when it was last done, when it is next due and whether it is late. */
-export interface DueCheck {
-  readonly check: MonitoringCheck;
-  readonly intervalMinutes: number;
-  readonly lastAt: string | null;
-  readonly nextDueAt: string;
-  readonly minutesOverdue: number;
-}
+/** A partograph check: when it was last done, when it is next due and whether it is late. */
+export type DueCheck = ScheduledCheck<MonitoringCheck>;
 
 /** Labour stage covered by the partograph. */
 export type PartographStatus = 'not-started' | 'active-phase' | 'fully-dilated';
@@ -86,9 +58,6 @@ export interface StartedPartograph {
   readonly due: readonly DueCheck[];
   readonly issues: readonly ReadingIssue[];
 }
-
-/** A finding with its place on the chart. */
-export type ChartedFinding = Finding & { readonly hour: number };
 
 /** The result of `buildPartograph`. */
 export type Partograph = NotStartedPartograph | StartedPartograph;
