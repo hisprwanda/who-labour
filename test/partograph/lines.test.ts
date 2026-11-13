@@ -12,28 +12,32 @@ const rules = WHO_MODIFIED_PARTOGRAPH_RULES.cervix;
 
 describe('alert and action lines', () => {
   it('runs the alert line from 4 cm to 10 cm over 6 hours', () => {
-    expect(alertLine(4, rules)).toEqual({
+    expect(alertLine(rules)).toEqual({
       start: { hour: 0, dilatationCm: 4 },
       end: { hour: 6, dilatationCm: 10 },
     });
   });
 
   it('draws the action line 4 hours to the right', () => {
-    expect(actionLine(4, rules)).toEqual({
+    expect(actionLine(rules)).toEqual({
       start: { hour: 4, dilatationCm: 4 },
       end: { hour: 10, dilatationCm: 10 },
     });
   });
 
-  it('starts both lines at the admission dilatation when admitted at 7 cm', () => {
-    expect(alertLine(7, rules).end).toEqual({ hour: 3, dilatationCm: 10 });
-    expect(actionLine(7, rules).start).toEqual({ hour: 4, dilatationCm: 7 });
+  it('starts both lines at the active phase dilatation from the rules', () => {
+    const fromFive = { ...rules, activePhaseFromCm: 5 };
+    expect(alertLine(fromFive)).toEqual({
+      start: { hour: 0, dilatationCm: 5 },
+      end: { hour: 5, dilatationCm: 10 },
+    });
+    expect(actionLine(fromFive).start).toEqual({ hour: 4, dilatationCm: 5 });
   });
 
   it('gives the hour each line reaches a dilatation, capped at full dilatation', () => {
-    expect(alertLineHourAt(6, 4, rules)).toBe(2);
-    expect(actionLineHourAt(6, 4, rules)).toBe(6);
-    expect(alertLineHourAt(12, 4, rules)).toBe(6);
+    expect(alertLineHourAt(6, rules)).toBe(2);
+    expect(actionLineHourAt(6, rules)).toBe(6);
+    expect(alertLineHourAt(12, rules)).toBe(6);
   });
 });
 
@@ -49,11 +53,11 @@ describe('cervixZone', () => {
     ['fully dilated after the action line reached 10 cm', 11, 10, 'right-of-action-line'],
     ['fully dilated on time', 6, 10, 'left-of-alert-line'],
   ] as const)('places a point %s', (_, hours, dilatationCm, zone) => {
-    expect(cervixZone({ hour: hours, dilatationCm }, 4, rules)).toBe(zone);
+    expect(cervixZone({ hour: hours, dilatationCm }, rules)).toBe(zone);
   });
 
   it('uses a custom action line distance', () => {
-    expect(cervixZone({ hour: 2, dilatationCm: 4 }, 4, { ...rules, actionLineAfterHours: 2 })).toBe(
+    expect(cervixZone({ hour: 2, dilatationCm: 4 }, { ...rules, actionLineAfterHours: 2 })).toBe(
       'right-of-action-line',
     );
   });

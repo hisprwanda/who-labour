@@ -17,7 +17,7 @@ export interface PartographInput {
   readonly rules?: PartographRuleOverrides;
 }
 
-/** A reading placed on the chart: hours since the active phase started, and its grid column. */
+/** A reading placed on the chart: hours from the alert line's start, and its grid column. */
 export type ChartedReading<R extends Reading = Reading> = R extends Reading
   ? DistributiveOmit<R, 'at'> & {
       readonly at: string;
