@@ -8,11 +8,12 @@ import {
   classifyTemperature,
   classifyUrine,
 } from '../core/maternal.js';
-import { classifyContractions } from '../core/contractions.js';
+import { classifyContractions, oxytocinRunningAt } from '../core/contractions.js';
 import { actionLine, actionLineHourAt, alertLine, alertLineHourAt, cervixZone } from './lines.js';
 import { resolvePartographRules, type PartographRules } from './rules.js';
 import { dueChecks } from './schedule.js';
-import { buildGrid, chartReading } from './grid.js';
+import { buildGrid } from './grid.js';
+import { chartReading } from '../core/chart.js';
 import type {
   CervixPoint,
   CervixProgress,
@@ -26,15 +27,6 @@ type CervixTimedReading = TimedReading & { readonly kind: 'cervix' };
 
 function isCervix(reading: TimedReading): reading is CervixTimedReading {
   return reading.kind === 'cervix';
-}
-
-function oxytocinRunningAt(readings: readonly TimedReading[], time: number): boolean {
-  let running = false;
-  for (const reading of readings) {
-    if (reading.time > time) break;
-    if (reading.kind === 'oxytocin') running = reading.dropsPerMinute > 0;
-  }
-  return running;
 }
 
 function assess(
@@ -72,6 +64,13 @@ function assess(
     case 'oxytocin':
     case 'drug':
     case 'iv-fluid':
+    case 'companion':
+    case 'pain-relief':
+    case 'oral-fluid':
+    case 'posture':
+    case 'decelerations':
+    case 'fetal-position':
+    case 'caput':
       return [];
   }
 }

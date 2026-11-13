@@ -1,11 +1,14 @@
 import type {
   AmnioticFluid,
+  DecelerationType,
   DistributiveOmit,
+  FetalPosition,
   Instant,
   Reading,
   ReadingIssue,
   ReadingIssueCode,
   ReadingKind,
+  SupportiveCareAnswer,
   TimedReading,
 } from './types.js';
 import { parseInstant, toIsoString } from './time.js';
@@ -34,6 +37,15 @@ const AMNIOTIC_FLUID_STATES: readonly AmnioticFluid[] = [
   'blood',
   'absent',
 ];
+
+const SUPPORTIVE_CARE_ANSWERS: readonly SupportiveCareAnswer[] = [
+  'yes',
+  'no',
+  'declined',
+  'unknown',
+];
+const DECELERATION_TYPES: readonly DecelerationType[] = ['none', 'early', 'late', 'variable'];
+const FETAL_POSITIONS: readonly FetalPosition[] = ['anterior', 'posterior', 'transverse'];
 
 const number =
   (min: number, max: number): Parse<number> =>
@@ -66,9 +78,14 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
     const bpm = number(1, 300)(beatsPerMinute);
     return bpm === null ? null : { kind: 'fetal-heart-rate', beatsPerMinute: bpm };
   },
-  'amniotic-fluid': ({ state }) => {
+  'amniotic-fluid': ({ state, meconiumGrade }) => {
     const value = oneOf(AMNIOTIC_FLUID_STATES)(state);
-    return value === null ? null : { kind: 'amniotic-fluid', state: value };
+    const grade = optional(meconiumGrade, integer<1 | 2 | 3>(1, 3));
+    if (value === null || grade === null) return null;
+    if (grade === undefined) return { kind: 'amniotic-fluid', state: value };
+    return value === 'meconium'
+      ? { kind: 'amniotic-fluid', state: value, meconiumGrade: grade }
+      : null;
   },
   moulding: ({ grade }) => {
     const value = integer<0 | 1 | 2 | 3>(0, 3)(grade);
@@ -140,6 +157,34 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
       ...(acetoneGrade === undefined ? {} : { acetone: acetoneGrade }),
       ...(volume === undefined ? {} : { volumeMl: volume }),
     };
+  },
+  companion: ({ given }) => {
+    const value = oneOf(SUPPORTIVE_CARE_ANSWERS)(given);
+    return value === null ? null : { kind: 'companion', given: value };
+  },
+  'pain-relief': ({ given }) => {
+    const value = oneOf(SUPPORTIVE_CARE_ANSWERS)(given);
+    return value === null ? null : { kind: 'pain-relief', given: value };
+  },
+  'oral-fluid': ({ given }) => {
+    const value = oneOf(SUPPORTIVE_CARE_ANSWERS)(given);
+    return value === null ? null : { kind: 'oral-fluid', given: value };
+  },
+  posture: ({ position }) => {
+    const value = oneOf<'supine' | 'mobile'>(['supine', 'mobile'])(position);
+    return value === null ? null : { kind: 'posture', position: value };
+  },
+  decelerations: ({ type }) => {
+    const value = oneOf(DECELERATION_TYPES)(type);
+    return value === null ? null : { kind: 'decelerations', type: value };
+  },
+  'fetal-position': ({ position }) => {
+    const value = oneOf(FETAL_POSITIONS)(position);
+    return value === null ? null : { kind: 'fetal-position', position: value };
+  },
+  caput: ({ grade }) => {
+    const value = integer<0 | 1 | 2 | 3>(0, 3)(grade);
+    return value === null ? null : { kind: 'caput', grade: value };
   },
 };
 

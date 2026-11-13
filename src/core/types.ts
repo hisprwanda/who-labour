@@ -10,6 +10,24 @@ export type AmnioticFluid = 'intact' | 'ruptured' | 'clear' | 'meconium' | 'bloo
 /** Moulding of the fetal skull: 0 separated, 1 apposed, 2 overlapped reducible, 3 overlapped not reducible. */
 export type MouldingGrade = 0 | 1 | 2 | 3;
 
+/** Meconium staining of the liquor: 1 is +, 2 is ++, 3 is +++ (thick). */
+export type MeconiumGrade = 1 | 2 | 3;
+
+/** Caput succedaneum: 0 none, 1 is +, 2 is ++, 3 is +++. */
+export type CaputGrade = 0 | 1 | 2 | 3;
+
+/** Whether supportive care was given: `declined` means the woman did not want it. */
+export type SupportiveCareAnswer = 'yes' | 'no' | 'declined' | 'unknown';
+
+/** The woman's posture: lying supine or mobile (upright, walking or any position she chooses). */
+export type Posture = 'supine' | 'mobile';
+
+/** Fetal heart rate decelerations heard. */
+export type DecelerationType = 'none' | 'early' | 'late' | 'variable';
+
+/** Position of the fetal occiput: anterior, posterior or transverse. */
+export type FetalPosition = 'anterior' | 'posterior' | 'transverse';
+
 /** Fifths of the fetal head palpable above the pelvic brim, from 5 (not engaged) to 0. */
 export type FifthsPalpable = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -29,6 +47,7 @@ export interface FetalHeartRateReading extends ReadingBase {
 export interface AmnioticFluidReading extends ReadingBase {
   readonly kind: 'amniotic-fluid';
   readonly state: AmnioticFluid;
+  readonly meconiumGrade?: MeconiumGrade;
 }
 
 /** Moulding of the fetal skull bones. */
@@ -104,6 +123,48 @@ export interface UrineReading extends ReadingBase {
   readonly volumeMl?: number;
 }
 
+/** Whether the woman has a labour companion with her. */
+export interface CompanionReading extends ReadingBase {
+  readonly kind: 'companion';
+  readonly given: SupportiveCareAnswer;
+}
+
+/** Whether pain relief was offered. */
+export interface PainReliefReading extends ReadingBase {
+  readonly kind: 'pain-relief';
+  readonly given: SupportiveCareAnswer;
+}
+
+/** Whether oral fluid was offered. */
+export interface OralFluidReading extends ReadingBase {
+  readonly kind: 'oral-fluid';
+  readonly given: SupportiveCareAnswer;
+}
+
+/** The woman's posture. */
+export interface PostureReading extends ReadingBase {
+  readonly kind: 'posture';
+  readonly position: Posture;
+}
+
+/** Fetal heart rate decelerations. */
+export interface DecelerationsReading extends ReadingBase {
+  readonly kind: 'decelerations';
+  readonly type: DecelerationType;
+}
+
+/** Position of the fetal head. */
+export interface FetalPositionReading extends ReadingBase {
+  readonly kind: 'fetal-position';
+  readonly position: FetalPosition;
+}
+
+/** Caput succedaneum on the fetal head. */
+export interface CaputReading extends ReadingBase {
+  readonly kind: 'caput';
+  readonly grade: CaputGrade;
+}
+
 /** Any observation recorded during labour. */
 export type Reading =
   | FetalHeartRateReading
@@ -118,7 +179,14 @@ export type Reading =
   | PulseReading
   | BloodPressureReading
   | TemperatureReading
-  | UrineReading;
+  | UrineReading
+  | CompanionReading
+  | PainReliefReading
+  | OralFluidReading
+  | PostureReading
+  | DecelerationsReading
+  | FetalPositionReading
+  | CaputReading;
 
 /** The `kind` of every reading. */
 export type ReadingKind = Reading['kind'];
@@ -172,7 +240,16 @@ export type FindingCode =
   | 'proteinuria'
   | 'ketonuria'
   | 'alert-line-crossed'
-  | 'action-line-crossed';
+  | 'action-line-crossed'
+  | 'companion-absent'
+  | 'pain-relief-absent'
+  | 'oral-fluid-absent'
+  | 'supine-posture'
+  | 'late-decelerations'
+  | 'fetal-position-abnormal'
+  | 'caput-severe'
+  | 'cervix-progress-delayed'
+  | 'second-stage-prolonged';
 
 /** A code and severity produced by a classifier. */
 export interface Assessment {

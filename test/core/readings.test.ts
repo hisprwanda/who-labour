@@ -58,6 +58,25 @@ describe('normalizeReadings', () => {
     ['an unknown liquor state', { kind: 'amniotic-fluid', at, state: 'green' }, 'invalid-value'],
     ['a moulding grade of 4', { kind: 'moulding', at, grade: 4 }, 'invalid-value'],
     ['a dilatation over 10 cm', { kind: 'cervix', at, dilatationCm: 11 }, 'invalid-value'],
+    [
+      'a meconium grade on clear liquor',
+      { kind: 'amniotic-fluid', at, state: 'clear', meconiumGrade: 2 },
+      'invalid-value',
+    ],
+    [
+      'a meconium grade of 4',
+      { kind: 'amniotic-fluid', at, state: 'meconium', meconiumGrade: 4 },
+      'invalid-value',
+    ],
+    ['an unknown companion answer', { kind: 'companion', at, given: true }, 'invalid-value'],
+    ['an unknown posture', { kind: 'posture', at, position: 'standing' }, 'invalid-value'],
+    ['an unknown deceleration', { kind: 'decelerations', at, type: 'prolonged' }, 'invalid-value'],
+    [
+      'an unknown fetal position',
+      { kind: 'fetal-position', at, position: 'breech' },
+      'invalid-value',
+    ],
+    ['a caput grade of 4', { kind: 'caput', at, grade: 4 }, 'invalid-value'],
     ['fractional fifths', { kind: 'descent', at, fifthsPalpable: 2.5 }, 'invalid-value'],
     [
       'fractional contractions',
@@ -174,5 +193,22 @@ describe('normalizeReadings', () => {
     const { readings, issues } = normalizeReadings(all);
     expect(issues).toEqual([]);
     expect(readings).toHaveLength(all.length);
+  });
+
+  it.each([
+    { kind: 'amniotic-fluid', state: 'meconium', meconiumGrade: 3 },
+    { kind: 'amniotic-fluid', state: 'meconium' },
+    { kind: 'companion', given: 'declined' },
+    { kind: 'pain-relief', given: 'yes' },
+    { kind: 'pain-relief', given: 'unknown' },
+    { kind: 'oral-fluid', given: 'no' },
+    { kind: 'posture', position: 'mobile' },
+    { kind: 'decelerations', type: 'late' },
+    { kind: 'fetal-position', position: 'transverse' },
+    { kind: 'caput', grade: 0 },
+  ])('accepts the Labour Care Guide reading %o', (payload) => {
+    const { readings, issues } = single({ ...payload, at });
+    expect(issues).toEqual([]);
+    expect(readings).toEqual([{ ...payload, at: '2026-01-10T08:00:00.000Z', time, index: 0 }]);
   });
 });

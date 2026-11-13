@@ -1,7 +1,7 @@
-import type { ReadingKind, TimedReading } from '../core/types.js';
-import { MS_PER_MINUTE, hoursBetween, toIsoString } from '../core/time.js';
+import type { ReadingKind } from '../core/types.js';
+import { gridColumns, type ChartedReading } from '../core/chart.js';
 import type { ChartRules } from './rules.js';
-import type { ChartedReading, GridColumn, PartographGrid } from './types.js';
+import type { PartographGrid } from './types.js';
 
 const ROW_ORDER: readonly ReadingKind[] = [
   'fetal-heart-rate',
@@ -17,21 +17,14 @@ const ROW_ORDER: readonly ReadingKind[] = [
   'blood-pressure',
   'temperature',
   'urine',
+  'companion',
+  'pain-relief',
+  'oral-fluid',
+  'posture',
+  'decelerations',
+  'fetal-position',
+  'caput',
 ];
-
-/** Places a reading on the chart, dropping its epoch time. */
-export function chartReading(
-  reading: TimedReading,
-  chartStart: number,
-  columnMinutes: number,
-): ChartedReading {
-  const { time, index, ...rest } = reading;
-  return {
-    ...rest,
-    hour: hoursBetween(chartStart, time),
-    column: Math.floor((time - chartStart) / (columnMinutes * MS_PER_MINUTE)),
-  };
-}
 
 /** Time columns covering at least the minimum chart length and every reading, with readings by row. */
 export function buildGrid(
@@ -39,17 +32,13 @@ export function buildGrid(
   chartStart: number,
   rules: ChartRules,
 ): PartographGrid {
-  const minimumColumns = Math.ceil((rules.minimumHours * 60) / rules.columnMinutes);
   const lastColumn = readings.reduce((max, reading) => Math.max(max, reading.column), -1);
-  const columnMs = rules.columnMinutes * MS_PER_MINUTE;
-  const columns: GridColumn[] = Array.from(
-    { length: Math.max(minimumColumns, lastColumn + 1) },
-    (_, index) => ({
-      index,
-      hour: (index * rules.columnMinutes) / 60,
-      from: toIsoString(chartStart + index * columnMs),
-      to: toIsoString(chartStart + (index + 1) * columnMs),
-    }),
+  const columns = gridColumns(
+    chartStart,
+    chartStart,
+    rules.columnMinutes,
+    rules.minimumHours,
+    lastColumn,
   );
   const rows = Object.fromEntries(
     ROW_ORDER.map((kind) => [kind, readings.filter((reading) => reading.kind === kind)]),
