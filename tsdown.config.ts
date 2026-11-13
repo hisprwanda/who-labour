@@ -1,6 +1,6 @@
-import { defineConfig } from 'tsdown';
+import { defineConfig, type UserConfig } from 'tsdown';
 
-export default defineConfig({
+const config: UserConfig = defineConfig({
   entry: {
     index: 'src/index.ts',
     core: 'src/core/index.ts',
@@ -13,3 +13,5 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
 });
+
+export default config;
