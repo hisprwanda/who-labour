@@ -140,9 +140,9 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
 | `blood-pressure`   | `systolic`, `diastolic` in mmHg                                             |
 | `temperature`      | `celsius`                                                                   |
 | `urine`            | at least one of `protein` and `acetone` (dipstick 0 to 4), `volumeMl`       |
-| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it), `unknown`    |
-| `pain-relief`      | `given`: `yes`, `no`, `declined`, `unknown`                                 |
-| `oral-fluid`       | `given`: `yes`, `no`, `declined`, `unknown`                                 |
+| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it)               |
+| `pain-relief`      | `given`: `yes`, `no`, `declined`                                            |
+| `oral-fluid`       | `given`: `yes`, `no`, `declined`                                            |
 | `posture`          | `position`: `supine`, `mobile`                                              |
 | `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                 |
 | `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                           |
@@ -203,30 +203,30 @@ partograph's. The alert values, the centimetre limits and the layout match the 2
 second-stage limits and the 4-hourly checks are not on the form; they come from the user's manual
 and must be checked by a clinician before the first release.
 
-| Rule                     | Default                                                                | Source                    |
-| ------------------------ | ---------------------------------------------------------------------- | ------------------------- |
-| Active labour starts     | 5 cm                                                                   | LCG 2021                  |
-| Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h                | LCG 2021                  |
-| Second stage             | 3 h nulliparous, 2 h multiparous                                       | LCG manual 2020           |
-| Fetal heart rate         | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
-| Decelerations            | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
-| Contractions             | every 30 min (every 15 min in stage 2)                                 | LCG manual 2020           |
-| Supportive care          | every hour                                                             | LCG manual 2020           |
-| Pulse, temperature, BP   | every 4 h                                                              | LCG manual 2020           |
-| Urine                    | every 4 h (or whenever she passes urine)                               | LCG manual 2020           |
-| Vaginal exam             | every 4 h in the first stage                                           | LCG manual 2020           |
-| Supportive care          | companion, pain relief or oral fluid `no`, not `declined` or `unknown` | LCG 2021                  |
-| Posture                  | supine                                                                 | LCG 2021                  |
-| Fetal heart rate, watch  | below 110 or 160 and above                                             | LCG 2021                  |
-| Fetal heart rate, urgent | below 100 or above 180                                                 | MCPC 2017                 |
-| Decelerations            | late                                                                   | LCG 2021                  |
-| Liquor                   | meconium +++ (or ungraded) or blood-stained                            | LCG 2021                  |
-| Fetal position           | posterior or transverse                                                | LCG 2021                  |
-| Caput, moulding          | +++                                                                    | LCG 2021                  |
-| Contractions, too few    | 2 or fewer in 10 min, or under 20 s                                    | LCG 2021                  |
-| Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs        | LCG 2021, MCPC 2017       |
-| Pulse, BP, temperature   | as for the partograph                                                  | LCG 2021, MCPC 2017       |
-| Urine                    | protein or acetone ++ and above                                        | LCG 2021                  |
+| Rule                     | Default                                                         | Source                    |
+| ------------------------ | --------------------------------------------------------------- | ------------------------- |
+| Active labour starts     | 5 cm                                                            | LCG 2021                  |
+| Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h         | LCG 2021                  |
+| Second stage             | 3 h nulliparous, 2 h multiparous                                | LCG manual 2020           |
+| Fetal heart rate         | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
+| Decelerations            | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
+| Contractions             | every 30 min (every 15 min in stage 2)                          | LCG manual 2020           |
+| Supportive care          | every hour                                                      | LCG manual 2020           |
+| Pulse, temperature, BP   | every 4 h                                                       | LCG manual 2020           |
+| Urine                    | every 4 h (or whenever she passes urine)                        | LCG manual 2020           |
+| Vaginal exam             | every 4 h in the first stage                                    | LCG manual 2020           |
+| Supportive care          | companion, pain relief or oral fluid `no`, not `declined`       | LCG manual 2020           |
+| Posture                  | supine                                                          | LCG 2021                  |
+| Fetal heart rate, watch  | below 110 or 160 and above                                      | LCG 2021                  |
+| Fetal heart rate, urgent | below 100 or above 180                                          | MCPC 2017                 |
+| Decelerations            | late                                                            | LCG 2021                  |
+| Liquor                   | meconium +++ (or ungraded) or blood-stained                     | LCG 2021                  |
+| Fetal position           | posterior or transverse                                         | LCG 2021                  |
+| Caput, moulding          | +++                                                             | LCG 2021                  |
+| Contractions, too few    | 2 or fewer in 10 min, or under 20 s                             | LCG 2021                  |
+| Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs | LCG 2021, MCPC 2017       |
+| Pulse, BP, temperature   | as for the partograph                                           | LCG 2021, MCPC 2017       |
+| Urine                    | protein or acetone ++ and above                                 | LCG 2021                  |
 
 ### Local protocols
 

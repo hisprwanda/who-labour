@@ -16,8 +16,8 @@ export type MeconiumGrade = 1 | 2 | 3;
 /** Caput succedaneum: 0 none, 1 is +, 2 is ++, 3 is +++. */
 export type CaputGrade = 0 | 1 | 2 | 3;
 
-/** Whether supportive care was given: `declined` means the woman did not want it. */
-export type SupportiveCareAnswer = 'yes' | 'no' | 'declined' | 'unknown';
+/** Whether supportive care was given (Y, N or D): `declined` means the woman did not want it. */
+export type SupportiveCareAnswer = 'yes' | 'no' | 'declined';
 
 /** The woman's posture: lying supine or mobile (upright, walking or any position she chooses). */
 export type Posture = 'supine' | 'mobile';

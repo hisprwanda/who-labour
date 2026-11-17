@@ -69,6 +69,11 @@ describe('normalizeReadings', () => {
       'invalid-value',
     ],
     ['an unknown companion answer', { kind: 'companion', at, given: true }, 'invalid-value'],
+    [
+      'an unknown pain relief answer',
+      { kind: 'pain-relief', at, given: 'unknown' },
+      'invalid-value',
+    ],
     ['an unknown posture', { kind: 'posture', at, position: 'standing' }, 'invalid-value'],
     ['an unknown deceleration', { kind: 'decelerations', at, type: 'prolonged' }, 'invalid-value'],
     [
@@ -200,7 +205,6 @@ describe('normalizeReadings', () => {
     { kind: 'amniotic-fluid', state: 'meconium' },
     { kind: 'companion', given: 'declined' },
     { kind: 'pain-relief', given: 'yes' },
-    { kind: 'pain-relief', given: 'unknown' },
     { kind: 'oral-fluid', given: 'no' },
     { kind: 'posture', position: 'mobile' },
     { kind: 'decelerations', type: 'late' },

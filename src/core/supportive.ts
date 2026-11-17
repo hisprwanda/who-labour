@@ -9,7 +9,7 @@ const ABSENT = {
   'oral-fluid': 'oral-fluid-absent',
 } as const;
 
-/** Flags supportive care that was not given; `declined` and `unknown` are not flagged. */
+/** Flags supportive care that was not given; `declined` is not flagged. */
 export function classifySupportiveCare(
   kind: SupportiveCareKind,
   given: SupportiveCareAnswer,

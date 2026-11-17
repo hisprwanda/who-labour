@@ -38,12 +38,7 @@ const AMNIOTIC_FLUID_STATES: readonly AmnioticFluid[] = [
   'absent',
 ];
 
-const SUPPORTIVE_CARE_ANSWERS: readonly SupportiveCareAnswer[] = [
-  'yes',
-  'no',
-  'declined',
-  'unknown',
-];
+const SUPPORTIVE_CARE_ANSWERS: readonly SupportiveCareAnswer[] = ['yes', 'no', 'declined'];
 const DECELERATION_TYPES: readonly DecelerationType[] = ['none', 'early', 'late', 'variable'];
 const FETAL_POSITIONS: readonly FetalPosition[] = ['anterior', 'posterior', 'transverse'];
 
