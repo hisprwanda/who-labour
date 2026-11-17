@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hisprwanda/who-labour/compare/v0.2.0...v0.2.1) (2026-11-17)
+
+
+### Documentation
+
+* add a docs folder and trim the README ([#13](https://github.com/hisprwanda/who-labour/issues/13)) ([3839861](https://github.com/hisprwanda/who-labour/commit/3839861c8f46328ce478142f9b0a641ab0cc1d98))
+
 ## [0.2.0](https://github.com/hisprwanda/who-labour/compare/v0.1.0...v0.2.0) (2026-11-17)
 
 
