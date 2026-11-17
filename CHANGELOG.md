@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.2.0](https://github.com/hisprwanda/who-labour/compare/v0.1.0...v0.2.0) (2026-11-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lcg:** alert on cervix progress only when an exam shows no progress ([#11](https://github.com/hisprwanda/who-labour/issues/11))
+* **lcg:** check maternal pulse every 4 hours
+* **lcg:** check contractions every 15 minutes in the second stage
+* **lcg:** schedule urine checks every 4 hours
+* **lcg:** record labour onset as spontaneous or induced
+* **core:** drop unknown from supportive care answers
+
+### Features
+
+* **core:** accept a trace urine protein result ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **core:** add a route to drug readings ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **core:** add an infusion rate to IV fluid readings ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** record labour onset as spontaneous or induced ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** record ruptured membranes with an unknown time ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** schedule urine checks every 4 hours ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+
+
+### Bug Fixes
+
+* **core:** drop unknown from supportive care answers ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** alert on cervix progress only when an exam shows no progress ([#11](https://github.com/hisprwanda/who-labour/issues/11)) ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** check contractions every 15 minutes in the second stage ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+* **lcg:** check maternal pulse every 4 hours ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+
+
+### Documentation
+
+* **lcg:** cite the user's manual and record open clinical questions ([343e896](https://github.com/hisprwanda/who-labour/commit/343e8962d31609db969ab656b35c2a0a480b6e13))
+
 ## 0.1.0 (2026-11-16)
 
 
