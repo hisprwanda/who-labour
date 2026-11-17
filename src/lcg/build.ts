@@ -41,6 +41,7 @@ import type {
   LabourCareGuide,
   LabourCareGuideInput,
   LabourCareRows,
+  LabourOnset,
   LabourCareSections,
 } from './types.js';
 
@@ -169,6 +170,10 @@ function validParity(parity: number | null | undefined): number | null {
     : null;
 }
 
+function validOnset(onset: unknown): LabourOnset | null {
+  return onset === 'spontaneous' || onset === 'induced' ? onset : null;
+}
+
 function nullableIso(time: number | null): string | null {
   return time === null ? null : toIsoString(time);
 }
@@ -274,7 +279,7 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
     status: birthAt !== null ? 'birth' : full === undefined ? 'active-first-stage' : 'second-stage',
     header: {
       parity,
-      labourOnsetAt: nullableIso(optionalInstant(input.labourOnsetAt, now)),
+      labourOnset: validOnset(input.labourOnset),
       activeLabourAt: start.at,
       membranesRupturedAt: nullableIso(optionalInstant(input.membranesRupturedAt, now)),
       riskFactors: (input.riskFactors ?? [])

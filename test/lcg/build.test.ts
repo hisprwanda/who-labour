@@ -46,14 +46,14 @@ describe('buildLabourCareGuide start', () => {
     const guide = build({
       readings: [cervix(0, 5)],
       parity: 0,
-      labourOnsetAt: hour(-6),
+      labourOnset: 'induced',
       membranesRupturedAt: new Date(START - 3_600_000),
       riskFactors: [' anaemia ', '', 'previous caesarean'],
       now: hour(1),
     });
     expect(guide.header).toEqual({
       parity: 0,
-      labourOnsetAt: hour(-6),
+      labourOnset: 'induced',
       activeLabourAt: hour(0),
       membranesRupturedAt: hour(-1),
       riskFactors: ['anaemia', 'previous caesarean'],
@@ -66,13 +66,13 @@ describe('buildLabourCareGuide start', () => {
     const guide = build({
       readings: [cervix(0, 5)],
       parity: -1,
-      labourOnsetAt: '2026-01-10 02:00',
+      labourOnset: 'artificial' as never,
       membranesRupturedAt: hour(5),
       now: hour(1),
     });
     expect(guide.header).toMatchObject({
       parity: null,
-      labourOnsetAt: null,
+      labourOnset: null,
       membranesRupturedAt: null,
       riskFactors: [],
     });

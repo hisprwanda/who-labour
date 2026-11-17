@@ -3,11 +3,14 @@ import type { ScheduledCheck } from '../core/schedule.js';
 import type { Instant, Reading, ReadingIssue, ReadingKind, ReadingOfKind } from '../core/types.js';
 import type { LabourCareCheck, LabourCareGuideRuleOverrides } from './rules.js';
 
+/** How labour started, as on the form: on its own or induced by any means. */
+export type LabourOnset = 'spontaneous' | 'induced';
+
 /** What `buildLabourCareGuide` needs; episode facts are optional and passed through to the header. */
 export interface LabourCareGuideInput {
   readonly readings: readonly Reading[];
   readonly parity?: number | null;
-  readonly labourOnsetAt?: Instant | null;
+  readonly labourOnset?: LabourOnset | null;
   readonly membranesRupturedAt?: Instant | null;
   readonly riskFactors?: readonly string[];
   readonly pushingAt?: Instant | null;
@@ -19,7 +22,7 @@ export interface LabourCareGuideInput {
 /** Section 1 of the guide; a missing or invalid fact is `null`. */
 export interface LabourCareGuideHeader {
   readonly parity: number | null;
-  readonly labourOnsetAt: string | null;
+  readonly labourOnset: LabourOnset | null;
   readonly activeLabourAt: string;
   readonly membranesRupturedAt: string | null;
   readonly riskFactors: readonly string[];
