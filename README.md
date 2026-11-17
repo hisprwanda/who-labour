@@ -134,7 +134,7 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
 | `descent`          | `fifthsPalpable` from 5 to 0                                                           |
 | `contractions`     | `per10Minutes`, `durationSeconds`                                                      |
 | `oxytocin`         | `unitsPerLitre`, `dropsPerMinute` (0 means stopped)                                    |
-| `drug`             | `name`, optional `dose`                                                                |
+| `drug`             | `name`, optional `dose` and `route` (for example `IM`)                                 |
 | `iv-fluid`         | `name`, optional `volumeMl`                                                            |
 | `pulse`            | `beatsPerMinute`                                                                       |
 | `blood-pressure`   | `systolic`, `diastolic` in mmHg                                                        |

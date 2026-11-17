@@ -85,11 +85,12 @@ export interface OxytocinReading extends ReadingBase {
   readonly dropsPerMinute: number;
 }
 
-/** A medicine given. */
+/** A medicine given, with its dose and route (for example IM or oral). */
 export interface DrugReading extends ReadingBase {
   readonly kind: 'drug';
   readonly name: string;
   readonly dose?: string;
+  readonly route?: string;
 }
 
 /** An intravenous fluid given. */

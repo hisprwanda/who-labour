@@ -105,6 +105,11 @@ describe('normalizeReadings', () => {
       'invalid-value',
     ],
     [
+      'a drug with an empty route',
+      { kind: 'drug', at, name: 'Pethidine', route: ' ' },
+      'invalid-value',
+    ],
+    [
       'an IV fluid with a negative volume',
       { kind: 'iv-fluid', at, name: 'Ringer lactate', volumeMl: -5 },
       'invalid-value',
@@ -134,12 +139,14 @@ describe('normalizeReadings', () => {
   it('trims names and keeps optional fields only when given', () => {
     const { readings } = normalizeReadings([
       { kind: 'drug', at, name: ' Oxytocin ', dose: ' 10 IU ' },
+      { kind: 'drug', at, name: 'Pethidine', dose: '50 mg', route: ' IM ' },
       { kind: 'iv-fluid', at, name: 'Ringer lactate' },
       { kind: 'urine', at, protein: 0, volumeMl: 200 },
       { kind: 'urine', at, acetone: 2 },
     ]);
     expect(readings.map(({ time: _time, index: _index, at: _at, ...rest }) => rest)).toEqual([
       { kind: 'drug', name: 'Oxytocin', dose: '10 IU' },
+      { kind: 'drug', name: 'Pethidine', dose: '50 mg', route: 'IM' },
       { kind: 'iv-fluid', name: 'Ringer lactate' },
       { kind: 'urine', acetone: 2 },
       { kind: 'urine', protein: 0, volumeMl: 200 },

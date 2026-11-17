@@ -108,11 +108,17 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
       ? null
       : { kind: 'oxytocin', unitsPerLitre: units, dropsPerMinute: drops };
   },
-  drug: ({ name, dose }) => {
+  drug: ({ name, dose, route }) => {
     const drugName = text(name);
     const drugDose = optional(dose, text);
-    if (drugName === null || drugDose === null) return null;
-    return { kind: 'drug', name: drugName, ...(drugDose === undefined ? {} : { dose: drugDose }) };
+    const drugRoute = optional(route, text);
+    if (drugName === null || drugDose === null || drugRoute === null) return null;
+    return {
+      kind: 'drug',
+      name: drugName,
+      ...(drugDose === undefined ? {} : { dose: drugDose }),
+      ...(drugRoute === undefined ? {} : { route: drugRoute }),
+    };
   },
   'iv-fluid': ({ name, volumeMl }) => {
     const fluidName = text(name);
