@@ -4,6 +4,9 @@ export type Instant = Date | number | string;
 /** Urine dipstick result: 0 is negative, 1 to 4 are plus signs. */
 export type DipstickGrade = 0 | 1 | 2 | 3 | 4;
 
+/** Urine protein dipstick result: a grade, or `trace` between negative and 1+. */
+export type ProteinResult = DipstickGrade | 'trace';
+
 /** Membranes and liquor as charted: intact, ruptured, clear, meconium-stained, blood-stained or absent. */
 export type AmnioticFluid = 'intact' | 'ruptured' | 'clear' | 'meconium' | 'blood' | 'absent';
 
@@ -118,7 +121,7 @@ export interface TemperatureReading extends ReadingBase {
 /** Urine passed: dipstick protein and acetone, and volume. */
 export interface UrineReading extends ReadingBase {
   readonly kind: 'urine';
-  readonly protein?: DipstickGrade;
+  readonly protein?: ProteinResult;
   readonly acetone?: DipstickGrade;
   readonly volumeMl?: number;
 }

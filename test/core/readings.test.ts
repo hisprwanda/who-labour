@@ -117,6 +117,7 @@ describe('normalizeReadings', () => {
     ['a temperature of 50 °C', { kind: 'temperature', at, celsius: 50 }, 'invalid-value'],
     ['an empty urine reading', { kind: 'urine', at }, 'invalid-value'],
     ['a urine protein of 5', { kind: 'urine', at, protein: 5 }, 'invalid-value'],
+    ['a urine acetone trace', { kind: 'urine', at, acetone: 'trace' }, 'invalid-value'],
     ['a NaN pulse', { kind: 'pulse', at, beatsPerMinute: Number.NaN }, 'invalid-value'],
   ])('reports %s', (_, reading, code) => {
     const { readings, issues } = single(reading);
@@ -194,6 +195,7 @@ describe('normalizeReadings', () => {
       { kind: 'blood-pressure', at, systolic: 120, diastolic: 80 },
       { kind: 'temperature', at, celsius: 36.8 },
       { kind: 'urine', at, protein: 0, acetone: 0, volumeMl: 150 },
+      { kind: 'urine', at, protein: 'trace' },
     ];
     const { readings, issues } = normalizeReadings(all);
     expect(issues).toEqual([]);

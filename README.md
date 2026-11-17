@@ -125,28 +125,28 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
 
 ## Readings
 
-| `kind`             | Values                                                                      |
-| ------------------ | --------------------------------------------------------------------------- |
-| `fetal-heart-rate` | `beatsPerMinute`                                                            |
-| `amniotic-fluid`   | `state`: `intact`, `ruptured`, `clear`, `meconium`, `blood`, `absent`       |
-| `moulding`         | `grade`: 0 separated, 1 apposed, 2 overlapped reducible, 3 overlapped fixed |
-| `cervix`           | `dilatationCm` from 0 to 10                                                 |
-| `descent`          | `fifthsPalpable` from 5 to 0                                                |
-| `contractions`     | `per10Minutes`, `durationSeconds`                                           |
-| `oxytocin`         | `unitsPerLitre`, `dropsPerMinute` (0 means stopped)                         |
-| `drug`             | `name`, optional `dose`                                                     |
-| `iv-fluid`         | `name`, optional `volumeMl`                                                 |
-| `pulse`            | `beatsPerMinute`                                                            |
-| `blood-pressure`   | `systolic`, `diastolic` in mmHg                                             |
-| `temperature`      | `celsius`                                                                   |
-| `urine`            | at least one of `protein` and `acetone` (dipstick 0 to 4), `volumeMl`       |
-| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it)               |
-| `pain-relief`      | `given`: `yes`, `no`, `declined`                                            |
-| `oral-fluid`       | `given`: `yes`, `no`, `declined`                                            |
-| `posture`          | `position`: `supine`, `mobile`                                              |
-| `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                 |
-| `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                           |
-| `caput`            | `grade`: 0 none, 1 +, 2 ++, 3 +++                                           |
+| `kind`             | Values                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| `fetal-heart-rate` | `beatsPerMinute`                                                                       |
+| `amniotic-fluid`   | `state`: `intact`, `ruptured`, `clear`, `meconium`, `blood`, `absent`                  |
+| `moulding`         | `grade`: 0 separated, 1 apposed, 2 overlapped reducible, 3 overlapped fixed            |
+| `cervix`           | `dilatationCm` from 0 to 10                                                            |
+| `descent`          | `fifthsPalpable` from 5 to 0                                                           |
+| `contractions`     | `per10Minutes`, `durationSeconds`                                                      |
+| `oxytocin`         | `unitsPerLitre`, `dropsPerMinute` (0 means stopped)                                    |
+| `drug`             | `name`, optional `dose`                                                                |
+| `iv-fluid`         | `name`, optional `volumeMl`                                                            |
+| `pulse`            | `beatsPerMinute`                                                                       |
+| `blood-pressure`   | `systolic`, `diastolic` in mmHg                                                        |
+| `temperature`      | `celsius`                                                                              |
+| `urine`            | at least one of `protein` (dipstick 0 to 4 or `trace`), `acetone` (0 to 4), `volumeMl` |
+| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it)                          |
+| `pain-relief`      | `given`: `yes`, `no`, `declined`                                                       |
+| `oral-fluid`       | `given`: `yes`, `no`, `declined`                                                       |
+| `posture`          | `position`: `supine`, `mobile`                                                         |
+| `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                            |
+| `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                                      |
+| `caput`            | `grade`: 0 none, 1 +, 2 ++, 3 +++                                                      |
 
 `amniotic-fluid` also takes an optional `meconiumGrade` (1 to 3, for M+ to M+++) when the state is
 `meconium`. The partograph accepts every kind and charts the Labour Care Guide ones without

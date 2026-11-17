@@ -140,7 +140,9 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
     return value === null ? null : { kind: 'temperature', celsius: value };
   },
   urine: ({ protein, acetone, volumeMl }) => {
-    const proteinGrade = optional(protein, integer<0 | 1 | 2 | 3 | 4>(0, 4));
+    const proteinGrade = optional(protein, (value) =>
+      value === 'trace' ? 'trace' : integer<0 | 1 | 2 | 3 | 4>(0, 4)(value),
+    );
     const acetoneGrade = optional(acetone, integer<0 | 1 | 2 | 3 | 4>(0, 4));
     const volume = optional(volumeMl, number(0, 5_000));
     if (proteinGrade === null || acetoneGrade === null || volume === null) return null;

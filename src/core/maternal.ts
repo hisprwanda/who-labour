@@ -1,4 +1,4 @@
-import type { Assessment, DipstickGrade } from './types.js';
+import type { Assessment, DipstickGrade, ProteinResult } from './types.js';
 
 /** Maternal pulse limits in beats per minute. */
 export interface PulseLimits {
@@ -57,13 +57,14 @@ export function classifyTemperature(celsius: number, limits: TemperatureLimits):
   return null;
 }
 
-/** Flags protein and acetone in urine; returns one assessment per finding. */
+/** Flags protein and acetone in urine (trace protein counts as below 1+); one assessment per finding. */
 export function classifyUrine(
-  urine: { readonly protein?: DipstickGrade; readonly acetone?: DipstickGrade },
+  urine: { readonly protein?: ProteinResult; readonly acetone?: DipstickGrade },
   limits: UrineLimits,
 ): Assessment[] {
   const assessments: Assessment[] = [];
-  if (urine.protein !== undefined && urine.protein >= limits.proteinFrom) {
+  const protein = urine.protein === 'trace' ? 0.5 : urine.protein;
+  if (protein !== undefined && protein >= limits.proteinFrom) {
     assessments.push({ code: 'proteinuria', severity: 'watch' });
   }
   if (urine.acetone !== undefined && urine.acetone >= limits.acetoneFrom) {

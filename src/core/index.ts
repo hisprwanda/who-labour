@@ -30,6 +30,7 @@ export type {
   PainReliefReading,
   Posture,
   PostureReading,
+  ProteinResult,
   PulseReading,
   Reading,
   ReadingBase,
