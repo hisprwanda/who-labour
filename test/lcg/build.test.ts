@@ -275,6 +275,7 @@ describe('second stage', () => {
     });
     const byCheck = Object.fromEntries(guide.due.map((check) => [check.check, check]));
     expect(byCheck['fetal-heart-rate']).toMatchObject({ intervalMinutes: 5, minutesOverdue: 10 });
+    expect(byCheck['contractions']).toMatchObject({ intervalMinutes: 15 });
     expect(byCheck['vaginal-exam']).toBeUndefined();
   });
 });

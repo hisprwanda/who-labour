@@ -208,7 +208,7 @@ and must be checked by a clinician before the first release.
 | Second stage             | 3 h nulliparous, 2 h multiparous                                       | LCG manual 2020           |
 | Fetal heart rate         | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
 | Decelerations            | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
-| Contractions             | every 30 min                                                           | LCG 2021                  |
+| Contractions             | every 30 min (every 15 min in stage 2)                                 | LCG manual 2020           |
 | Supportive care          | every hour                                                             | LCG manual 2020           |
 | Pulse, temperature, BP   | every 4 h                                                              | LCG manual 2020           |
 | Vaginal exam             | every 4 h in the first stage                                           | LCG manual 2020           |

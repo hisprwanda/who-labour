@@ -106,11 +106,11 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     'oral-fluid': 60,
     posture: 60,
   },
-  // LCG manual 2020 Tables 4 to 6: FHR every 5 min, contractions every 30 min (pending), the rest as in the first stage.
+  // LCG manual 2020 Tables 4 to 6: FHR every 5 min, contractions at least every 15 min, the rest as in the first stage.
   secondStageMinutes: {
     'fetal-heart-rate': 5,
     decelerations: 5,
-    contractions: 30,
+    contractions: 15,
     pulse: 240,
     'blood-pressure': 240,
     temperature: 240,
