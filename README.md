@@ -190,7 +190,9 @@ WHO Labour Care Guide and the emergency values of MCPC.
   guide for midwives and doctors._ 2nd ed. Geneva: WHO; 2017.
 - **LCG 2021:** World Health Organization. _WHO labour care guide_ (form). Geneva: WHO; 2021.
 - **LCG manual 2020:** World Health Organization. _WHO labour care guide: user's manual._ Geneva:
-  WHO; 2020. Used only for what the form does not print.
+  WHO; 2020. Used for the check intervals, the second-stage limits and the nomenclature.
+- **LCG policy brief 2022:** World Health Organization. _Key points for considering adoption of the
+  WHO labour care guide: policy brief._ Geneva: WHO; 2022.
 
 The values above were transcribed by hand and must be checked against the documents by a
 clinician before the first release. Please report any difference with the "Clinical accuracy" issue
@@ -200,14 +202,15 @@ template.
 
 All defaults live in `WHO_LABOUR_CARE_GUIDE_RULES` and are overridden the same way as the
 partograph's. The alert values, the centimetre limits and the layout match the 2021 form. The
-second-stage limits and the 4-hourly checks are not on the form; they come from the user's manual
-and must be checked by a clinician before the first release.
+second-stage limits and the check intervals are not on the form; they come from the user's manual
+(Tables 3 to 6). WHO's worked example from the manual (Mary Jane, Figures 3 to 8) is a test
+scenario and charts as the manual shows it.
 
 | Rule                     | Default                                                         | Source                    |
 | ------------------------ | --------------------------------------------------------------- | ------------------------- |
 | Active labour starts     | 5 cm                                                            | LCG 2021                  |
 | Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h         | LCG 2021                  |
-| Second stage             | 3 h nulliparous, 2 h multiparous                                | LCG manual 2020           |
+| Second stage             | 3 h nulliparous, 2 h multiparous, from full dilatation          | LCG manual 2020           |
 | Fetal heart rate         | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
 | Decelerations            | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
 | Contractions             | every 30 min (every 15 min in stage 2)                          | LCG manual 2020           |
@@ -226,7 +229,25 @@ and must be checked by a clinician before the first release.
 | Contractions, too few    | 2 or fewer in 10 min, or under 20 s                             | LCG 2021                  |
 | Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs | LCG 2021, MCPC 2017       |
 | Pulse, BP, temperature   | as for the partograph                                           | LCG 2021, MCPC 2017       |
-| Urine                    | protein or acetone ++ and above                                 | LCG 2021                  |
+| Urine                    | protein or acetone ++ and above (trace protein is below +)      | LCG 2021                  |
+
+#### Open questions for a clinician
+
+Two rules in the user's manual are read here in the stricter way, which alerts earlier. A clinician
+should confirm them before they are relaxed:
+
+- **Contractions.** The manual says to count again over another 10 minutes when a count is out of
+  range, and to alert only if it is confirmed. The guide alerts on the first count.
+- **Second-stage clock.** The manual says birth is not completed by 3 hours (nulliparous) or 2
+  hours (multiparous) "from the start of the active second stage". The guide starts the clock at
+  full dilatation, not at `pushingAt`.
+
+#### Not modelled yet
+
+- Section 7 (assessment, plan and initials), see above.
+- The second stage records the most significant value in each 15 minutes; readings keep their
+  exact `hour`, but there is no 15-minute cell.
+- The form says to continue on a new guide when labour goes past 12 hours; the grid just grows.
 
 ### Local protocols
 
