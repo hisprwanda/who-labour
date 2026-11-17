@@ -121,6 +121,10 @@ describe('maternal classifiers', () => {
   it('flags protein and acetone from ++', () => {
     expect(classifyUrine({ protein: 1, acetone: 1 }, who.urine)).toEqual([]);
     expect(classifyUrine({}, who.urine)).toEqual([]);
+    expect(classifyUrine({ protein: 'trace' }, who.urine)).toEqual([]);
+    expect(classifyUrine({ protein: 'trace' }, { proteinFrom: 0, acetoneFrom: 2 })).toEqual([
+      { code: 'proteinuria', severity: 'watch' },
+    ]);
     expect(classifyUrine({ protein: 2, acetone: 3 }, who.urine)).toEqual([
       { code: 'proteinuria', severity: 'watch' },
       { code: 'ketonuria', severity: 'watch' },

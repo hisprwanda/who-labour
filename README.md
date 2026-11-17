@@ -61,8 +61,8 @@ const guide = buildLabourCareGuide({
 });
 
 if (guide.status !== 'not-started') {
-  guide.progress; // { dilatationCm: 7, hours: 3, limitHours: 3, delayed: true, ... }
-  guide.findings.map((finding) => finding.code); // ['companion-absent', 'cervix-progress-delayed']
+  guide.progress; // { dilatationCm: 7, hours: 3, limitHours: 3, limitReached: true, delayed: false, ... }
+  guide.findings.map((finding) => finding.code); // ['companion-absent']
 }
 ```
 
@@ -98,15 +98,19 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
   from that exam.
 - **Time at each centimetre.** For each whole centimetre examined, `cervix` lists when it was
   reached, when it was left, the hours spent there and its limit (6, 5, 3, 2.5 and 2 hours at 5 to 9
-  cm). A later exam that reads lower never resets the clock. When the limit is reached,
-  `cervix-progress-delayed` is reported at the moment the limit passed, even before the next exam,
-  so a board can show it at `now`. `progress` is the current centimetre, or `null` once fully
-  dilated.
+  cm). A later exam that reads lower never resets the clock. Once the limit for the current
+  centimetre has passed, `limitReached` is `true`: it raises no alert and means an exam is worth
+  doing. `cervix-progress-delayed` is reported only when an exam at or after the limit shows no
+  progress, as the LCG says, dated at that exam with its `readingId`. An exam that shows progress
+  never raises it, however long the gap, so WHO's own worked example has no delay. `progress` is
+  the current centimetre, or `null` once fully dilated.
 - **Second stage.** It starts at the first 10 cm reading. `second-stage-prolonged` is reported after
   3 hours for a nulliparous woman (`parity: 0`) and 2 hours otherwise. A missing or invalid parity
   uses the stricter 2 hours.
-- **Episode facts.** `parity`, `labourOnsetAt`, `membranesRupturedAt`, `riskFactors`, `pushingAt`
-  and `birthAt` are optional and go into `header`. An invalid or future value becomes `null`; it
+- **Episode facts.** `parity`, `labourOnset` (`spontaneous` or `induced`), `membranesRuptured`,
+  `membranesRupturedAt`, `riskFactors`, `pushingAt` and `birthAt` are optional and go into `header`.
+  A valid `membranesRupturedAt` sets `membranesRuptured` to `true`; `membranesRuptured: true` with no
+  time is the form's `U` (ruptured, time unknown). An invalid or future value becomes `null`; it
   never throws. `pushingAt` (the form's `P`) is also shown in `secondStage` and raises no alert.
   `birthAt` stops the clocks and the due checks.
 - **Grid.** `grid.firstStage` has hourly columns from the start, at least 12 hours long, as on the
@@ -121,28 +125,28 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
 
 ## Readings
 
-| `kind`             | Values                                                                      |
-| ------------------ | --------------------------------------------------------------------------- |
-| `fetal-heart-rate` | `beatsPerMinute`                                                            |
-| `amniotic-fluid`   | `state`: `intact`, `ruptured`, `clear`, `meconium`, `blood`, `absent`       |
-| `moulding`         | `grade`: 0 separated, 1 apposed, 2 overlapped reducible, 3 overlapped fixed |
-| `cervix`           | `dilatationCm` from 0 to 10                                                 |
-| `descent`          | `fifthsPalpable` from 5 to 0                                                |
-| `contractions`     | `per10Minutes`, `durationSeconds`                                           |
-| `oxytocin`         | `unitsPerLitre`, `dropsPerMinute` (0 means stopped)                         |
-| `drug`             | `name`, optional `dose`                                                     |
-| `iv-fluid`         | `name`, optional `volumeMl`                                                 |
-| `pulse`            | `beatsPerMinute`                                                            |
-| `blood-pressure`   | `systolic`, `diastolic` in mmHg                                             |
-| `temperature`      | `celsius`                                                                   |
-| `urine`            | at least one of `protein` and `acetone` (dipstick 0 to 4), `volumeMl`       |
-| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it), `unknown`    |
-| `pain-relief`      | `given`: `yes`, `no`, `declined`, `unknown`                                 |
-| `oral-fluid`       | `given`: `yes`, `no`, `declined`, `unknown`                                 |
-| `posture`          | `position`: `supine`, `mobile`                                              |
-| `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                 |
-| `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                           |
-| `caput`            | `grade`: 0 none, 1 +, 2 ++, 3 +++                                           |
+| `kind`             | Values                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| `fetal-heart-rate` | `beatsPerMinute`                                                                       |
+| `amniotic-fluid`   | `state`: `intact`, `ruptured`, `clear`, `meconium`, `blood`, `absent`                  |
+| `moulding`         | `grade`: 0 separated, 1 apposed, 2 overlapped reducible, 3 overlapped fixed            |
+| `cervix`           | `dilatationCm` from 0 to 10                                                            |
+| `descent`          | `fifthsPalpable` from 5 to 0                                                           |
+| `contractions`     | `per10Minutes`, `durationSeconds`                                                      |
+| `oxytocin`         | `unitsPerLitre`, `dropsPerMinute` (0 means stopped)                                    |
+| `drug`             | `name`, optional `dose` and `route` (for example `IM`)                                 |
+| `iv-fluid`         | `name`, optional `volumeMl` and `dropsPerMinute`                                       |
+| `pulse`            | `beatsPerMinute`                                                                       |
+| `blood-pressure`   | `systolic`, `diastolic` in mmHg                                                        |
+| `temperature`      | `celsius`                                                                              |
+| `urine`            | at least one of `protein` (dipstick 0 to 4 or `trace`), `acetone` (0 to 4), `volumeMl` |
+| `companion`        | `given`: `yes`, `no`, `declined` (the woman does not want it)                          |
+| `pain-relief`      | `given`: `yes`, `no`, `declined`                                                       |
+| `oral-fluid`       | `given`: `yes`, `no`, `declined`                                                       |
+| `posture`          | `position`: `supine`, `mobile`                                                         |
+| `decelerations`    | `type`: `none`, `early`, `late`, `variable`                                            |
+| `fetal-position`   | `position`: `anterior`, `posterior`, `transverse`                                      |
+| `caput`            | `grade`: 0 none, 1 +, 2 ++, 3 +++                                                      |
 
 `amniotic-fluid` also takes an optional `meconiumGrade` (1 to 3, for M+ to M+++) when the state is
 `meconium`. The partograph accepts every kind and charts the Labour Care Guide ones without
@@ -186,7 +190,9 @@ WHO Labour Care Guide and the emergency values of MCPC.
   guide for midwives and doctors._ 2nd ed. Geneva: WHO; 2017.
 - **LCG 2021:** World Health Organization. _WHO labour care guide_ (form). Geneva: WHO; 2021.
 - **LCG manual 2020:** World Health Organization. _WHO labour care guide: user's manual._ Geneva:
-  WHO; 2020. Used only for what the form does not print.
+  WHO; 2020. Used for the check intervals, the second-stage limits and the nomenclature.
+- **LCG policy brief 2022:** World Health Organization. _Key points for considering adoption of the
+  WHO labour care guide: policy brief._ Geneva: WHO; 2022.
 
 The values above were transcribed by hand and must be checked against the documents by a
 clinician before the first release. Please report any difference with the "Clinical accuracy" issue
@@ -196,32 +202,52 @@ template.
 
 All defaults live in `WHO_LABOUR_CARE_GUIDE_RULES` and are overridden the same way as the
 partograph's. The alert values, the centimetre limits and the layout match the 2021 form. The
-second-stage limits and the 4-hourly checks are not on the form; they come from the user's manual
-and must be checked by a clinician before the first release.
+second-stage limits and the check intervals are not on the form; they come from the user's manual
+(Tables 3 to 6). WHO's worked example from the manual (Mary Jane, Figures 3 to 8) is a test
+scenario and charts as the manual shows it.
 
-| Rule                     | Default                                                                | Source                    |
-| ------------------------ | ---------------------------------------------------------------------- | ------------------------- |
-| Active labour starts     | 5 cm                                                                   | LCG 2021                  |
-| Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h                | LCG 2021                  |
-| Second stage             | 3 h nulliparous, 2 h multiparous                                       | LCG manual 2020           |
-| Fetal heart rate         | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
-| Decelerations            | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
-| Contractions             | every 30 min                                                           | LCG 2021                  |
-| Pulse, supportive care   | every hour                                                             | LCG 2021                  |
-| Temperature, BP          | every 4 h                                                              | LCG manual 2020           |
-| Vaginal exam             | every 4 h in the first stage                                           | LCG manual 2020           |
-| Supportive care          | companion, pain relief or oral fluid `no`, not `declined` or `unknown` | LCG 2021                  |
-| Posture                  | supine                                                                 | LCG 2021                  |
-| Fetal heart rate, watch  | below 110 or 160 and above                                             | LCG 2021                  |
-| Fetal heart rate, urgent | below 100 or above 180                                                 | MCPC 2017                 |
-| Decelerations            | late                                                                   | LCG 2021                  |
-| Liquor                   | meconium +++ (or ungraded) or blood-stained                            | LCG 2021                  |
-| Fetal position           | posterior or transverse                                                | LCG 2021                  |
-| Caput, moulding          | +++                                                                    | LCG 2021                  |
-| Contractions, too few    | 2 or fewer in 10 min, or under 20 s                                    | LCG 2021                  |
-| Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs        | LCG 2021, MCPC 2017       |
-| Pulse, BP, temperature   | as for the partograph                                                  | LCG 2021, MCPC 2017       |
-| Urine                    | protein or acetone ++ and above                                        | LCG 2021                  |
+| Rule                     | Default                                                         | Source                    |
+| ------------------------ | --------------------------------------------------------------- | ------------------------- |
+| Active labour starts     | 5 cm                                                            | LCG 2021                  |
+| Time at each centimetre  | 5 cm: 6 h, 6 cm: 5 h, 7 cm: 3 h, 8 cm: 2.5 h, 9 cm: 2 h         | LCG 2021                  |
+| Second stage             | 3 h nulliparous, 2 h multiparous, from full dilatation          | LCG manual 2020           |
+| Fetal heart rate         | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
+| Decelerations            | every 30 min (every 5 min in stage 2)                           | LCG 2021, LCG manual 2020 |
+| Contractions             | every 30 min (every 15 min in stage 2)                          | LCG manual 2020           |
+| Supportive care          | every hour                                                      | LCG manual 2020           |
+| Pulse, temperature, BP   | every 4 h                                                       | LCG manual 2020           |
+| Urine                    | every 4 h (or whenever she passes urine)                        | LCG manual 2020           |
+| Vaginal exam             | every 4 h in the first stage                                    | LCG manual 2020           |
+| Supportive care          | companion, pain relief or oral fluid `no`, not `declined`       | LCG manual 2020           |
+| Posture                  | supine                                                          | LCG 2021                  |
+| Fetal heart rate, watch  | below 110 or 160 and above                                      | LCG 2021                  |
+| Fetal heart rate, urgent | below 100 or above 180                                          | MCPC 2017                 |
+| Decelerations            | late                                                            | LCG 2021                  |
+| Liquor                   | meconium +++ (or ungraded) or blood-stained                     | LCG 2021                  |
+| Fetal position           | posterior or transverse                                         | LCG 2021                  |
+| Caput, moulding          | +++                                                             | LCG 2021                  |
+| Contractions, too few    | 2 or fewer in 10 min, or under 20 s                             | LCG 2021                  |
+| Contractions, too many   | more than 5 in 10 min, or over 60 s; urgent while oxytocin runs | LCG 2021, MCPC 2017       |
+| Pulse, BP, temperature   | as for the partograph                                           | LCG 2021, MCPC 2017       |
+| Urine                    | protein or acetone ++ and above (trace protein is below +)      | LCG 2021                  |
+
+#### Open questions for a clinician
+
+Two rules in the user's manual are read here in the stricter way, which alerts earlier. A clinician
+should confirm them before they are relaxed:
+
+- **Contractions.** The manual says to count again over another 10 minutes when a count is out of
+  range, and to alert only if it is confirmed. The guide alerts on the first count.
+- **Second-stage clock.** The manual says birth is not completed by 3 hours (nulliparous) or 2
+  hours (multiparous) "from the start of the active second stage". The guide starts the clock at
+  full dilatation, not at `pushingAt`.
+
+#### Not modelled yet
+
+- Section 7 (assessment, plan and initials), see above.
+- The second stage records the most significant value in each 15 minutes; readings keep their
+  exact `hour`, but there is no 15-minute cell.
+- The form says to continue on a new guide when labour goes past 12 hours; the grid just grows.
 
 ### Local protocols
 

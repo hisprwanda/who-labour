@@ -69,6 +69,11 @@ describe('normalizeReadings', () => {
       'invalid-value',
     ],
     ['an unknown companion answer', { kind: 'companion', at, given: true }, 'invalid-value'],
+    [
+      'an unknown pain relief answer',
+      { kind: 'pain-relief', at, given: 'unknown' },
+      'invalid-value',
+    ],
     ['an unknown posture', { kind: 'posture', at, position: 'standing' }, 'invalid-value'],
     ['an unknown deceleration', { kind: 'decelerations', at, type: 'prolonged' }, 'invalid-value'],
     [
@@ -100,6 +105,16 @@ describe('normalizeReadings', () => {
       'invalid-value',
     ],
     [
+      'a drug with an empty route',
+      { kind: 'drug', at, name: 'Pethidine', route: ' ' },
+      'invalid-value',
+    ],
+    [
+      'an IV fluid running over 200 drops per minute',
+      { kind: 'iv-fluid', at, name: 'Saline', dropsPerMinute: 250 },
+      'invalid-value',
+    ],
+    [
       'an IV fluid with a negative volume',
       { kind: 'iv-fluid', at, name: 'Ringer lactate', volumeMl: -5 },
       'invalid-value',
@@ -112,6 +127,7 @@ describe('normalizeReadings', () => {
     ['a temperature of 50 °C', { kind: 'temperature', at, celsius: 50 }, 'invalid-value'],
     ['an empty urine reading', { kind: 'urine', at }, 'invalid-value'],
     ['a urine protein of 5', { kind: 'urine', at, protein: 5 }, 'invalid-value'],
+    ['a urine acetone trace', { kind: 'urine', at, acetone: 'trace' }, 'invalid-value'],
     ['a NaN pulse', { kind: 'pulse', at, beatsPerMinute: Number.NaN }, 'invalid-value'],
   ])('reports %s', (_, reading, code) => {
     const { readings, issues } = single(reading);
@@ -128,12 +144,14 @@ describe('normalizeReadings', () => {
   it('trims names and keeps optional fields only when given', () => {
     const { readings } = normalizeReadings([
       { kind: 'drug', at, name: ' Oxytocin ', dose: ' 10 IU ' },
+      { kind: 'drug', at, name: 'Pethidine', dose: '50 mg', route: ' IM ' },
       { kind: 'iv-fluid', at, name: 'Ringer lactate' },
       { kind: 'urine', at, protein: 0, volumeMl: 200 },
       { kind: 'urine', at, acetone: 2 },
     ]);
     expect(readings.map(({ time: _time, index: _index, at: _at, ...rest }) => rest)).toEqual([
       { kind: 'drug', name: 'Oxytocin', dose: '10 IU' },
+      { kind: 'drug', name: 'Pethidine', dose: '50 mg', route: 'IM' },
       { kind: 'iv-fluid', name: 'Ringer lactate' },
       { kind: 'urine', acetone: 2 },
       { kind: 'urine', protein: 0, volumeMl: 200 },
@@ -184,11 +202,12 @@ describe('normalizeReadings', () => {
       { kind: 'contractions', at, per10Minutes: 3, durationSeconds: 45 },
       { kind: 'oxytocin', at, unitsPerLitre: 5, dropsPerMinute: 10 },
       { kind: 'drug', at, name: 'Pethidine' },
-      { kind: 'iv-fluid', at, name: 'Saline', volumeMl: 500 },
+      { kind: 'iv-fluid', at, name: 'Saline', volumeMl: 500, dropsPerMinute: 40 },
       { kind: 'pulse', at, beatsPerMinute: 84 },
       { kind: 'blood-pressure', at, systolic: 120, diastolic: 80 },
       { kind: 'temperature', at, celsius: 36.8 },
       { kind: 'urine', at, protein: 0, acetone: 0, volumeMl: 150 },
+      { kind: 'urine', at, protein: 'trace' },
     ];
     const { readings, issues } = normalizeReadings(all);
     expect(issues).toEqual([]);
@@ -200,7 +219,6 @@ describe('normalizeReadings', () => {
     { kind: 'amniotic-fluid', state: 'meconium' },
     { kind: 'companion', given: 'declined' },
     { kind: 'pain-relief', given: 'yes' },
-    { kind: 'pain-relief', given: 'unknown' },
     { kind: 'oral-fluid', given: 'no' },
     { kind: 'posture', position: 'mobile' },
     { kind: 'decelerations', type: 'late' },

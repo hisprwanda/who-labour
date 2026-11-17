@@ -35,16 +35,15 @@ import {
   type LabourCareCheck,
   type LabourCareGuideRules,
 } from './rules.js';
-import { centimetreProgress, secondStageProgress } from './progress.js';
+import { centimetreProgress, secondStageProgress, type CervixTimedReading } from './progress.js';
 import type {
   LabourCareGrid,
   LabourCareGuide,
   LabourCareGuideInput,
   LabourCareRows,
+  LabourOnset,
   LabourCareSections,
 } from './types.js';
-
-type CervixTimedReading = TimedReading & { readonly kind: 'cervix' };
 
 const SECTIONS: { readonly [S in keyof LabourCareSections]: readonly LabourCareSections[S][] } = {
   supportiveCare: ['companion', 'pain-relief', 'oral-fluid', 'posture'],
@@ -68,6 +67,7 @@ const CHECK_READING: Readonly<Record<LabourCareCheck, ReadingKind>> = {
   pulse: 'pulse',
   'blood-pressure': 'blood-pressure',
   temperature: 'temperature',
+  urine: 'urine',
   'vaginal-exam': 'cervix',
   companion: 'companion',
   'pain-relief': 'pain-relief',
@@ -170,6 +170,10 @@ function validParity(parity: number | null | undefined): number | null {
     : null;
 }
 
+function validOnset(onset: unknown): LabourOnset | null {
+  return onset === 'spontaneous' || onset === 'induced' ? onset : null;
+}
+
 function nullableIso(time: number | null): string | null {
   return time === null ? null : toIsoString(time);
 }
@@ -210,10 +214,12 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
   const parity = validParity(input.parity);
   const birthAt = optionalInstant(input.birthAt, now);
   const pushingAt = optionalInstant(input.pushingAt, now);
+  const rupturedAt = optionalInstant(input.membranesRupturedAt, now);
   const end = birthAt === null ? now : Math.max(startedAt, birthAt);
   const cervixReadings = charted.filter(isCervix);
   const full = cervixReadings.find((reading) => reading.dilatationCm >= fullDilatationCm);
-  const cervix = centimetreProgress(cervixReadings, end, rules);
+  const levels = centimetreProgress(cervixReadings, end, rules);
+  const cervix = levels.map((level) => level.progress);
   const secondStage =
     full === undefined
       ? null
@@ -245,15 +251,20 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
         ...(reading.id === undefined ? {} : { readingId: reading.id }),
       })),
     ),
-    ...cervix
-      .filter((level) => level.delayed)
-      .map((level) =>
-        findingAt(
-          { code: 'cervix-progress-delayed', severity: 'watch' },
-          Date.parse(level.alertAt),
-          startedAt,
-        ),
-      ),
+    ...levels.flatMap(({ delayExam }) =>
+      delayExam === null
+        ? []
+        : [
+            {
+              code: 'cervix-progress-delayed' as const,
+              severity: 'watch' as const,
+              kind: 'cervix' as const,
+              at: delayExam.at,
+              hour: (delayExam.time - startedAt) / MS_PER_HOUR,
+              ...(delayExam.id === undefined ? {} : { readingId: delayExam.id }),
+            },
+          ],
+    ),
     ...(secondStage?.prolonged === true
       ? [
           findingAt(
@@ -269,9 +280,15 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
     status: birthAt !== null ? 'birth' : full === undefined ? 'active-first-stage' : 'second-stage',
     header: {
       parity,
-      labourOnsetAt: nullableIso(optionalInstant(input.labourOnsetAt, now)),
+      labourOnset: validOnset(input.labourOnset),
       activeLabourAt: start.at,
-      membranesRupturedAt: nullableIso(optionalInstant(input.membranesRupturedAt, now)),
+      membranesRuptured:
+        rupturedAt !== null
+          ? true
+          : typeof input.membranesRuptured === 'boolean'
+            ? input.membranesRuptured
+            : null,
+      membranesRupturedAt: nullableIso(rupturedAt),
       riskFactors: (input.riskFactors ?? [])
         .filter((factor): factor is string => typeof factor === 'string')
         .map((factor) => factor.trim())

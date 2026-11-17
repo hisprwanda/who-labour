@@ -8,6 +8,7 @@ export type {
   LabourCareGuideStatus,
   LabourCareRows,
   LabourCareSections,
+  LabourOnset,
   NotStartedLabourCareGuide,
   SecondStageProgress,
   StartedLabourCareGuide,

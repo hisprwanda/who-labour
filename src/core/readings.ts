@@ -38,12 +38,7 @@ const AMNIOTIC_FLUID_STATES: readonly AmnioticFluid[] = [
   'absent',
 ];
 
-const SUPPORTIVE_CARE_ANSWERS: readonly SupportiveCareAnswer[] = [
-  'yes',
-  'no',
-  'declined',
-  'unknown',
-];
+const SUPPORTIVE_CARE_ANSWERS: readonly SupportiveCareAnswer[] = ['yes', 'no', 'declined'];
 const DECELERATION_TYPES: readonly DecelerationType[] = ['none', 'early', 'late', 'variable'];
 const FETAL_POSITIONS: readonly FetalPosition[] = ['anterior', 'posterior', 'transverse'];
 
@@ -113,20 +108,28 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
       ? null
       : { kind: 'oxytocin', unitsPerLitre: units, dropsPerMinute: drops };
   },
-  drug: ({ name, dose }) => {
+  drug: ({ name, dose, route }) => {
     const drugName = text(name);
     const drugDose = optional(dose, text);
-    if (drugName === null || drugDose === null) return null;
-    return { kind: 'drug', name: drugName, ...(drugDose === undefined ? {} : { dose: drugDose }) };
+    const drugRoute = optional(route, text);
+    if (drugName === null || drugDose === null || drugRoute === null) return null;
+    return {
+      kind: 'drug',
+      name: drugName,
+      ...(drugDose === undefined ? {} : { dose: drugDose }),
+      ...(drugRoute === undefined ? {} : { route: drugRoute }),
+    };
   },
-  'iv-fluid': ({ name, volumeMl }) => {
+  'iv-fluid': ({ name, volumeMl, dropsPerMinute }) => {
     const fluidName = text(name);
     const volume = optional(volumeMl, number(0, 10_000));
-    if (fluidName === null || volume === null) return null;
+    const rate = optional(dropsPerMinute, number(0, 200));
+    if (fluidName === null || volume === null || rate === null) return null;
     return {
       kind: 'iv-fluid',
       name: fluidName,
       ...(volume === undefined ? {} : { volumeMl: volume }),
+      ...(rate === undefined ? {} : { dropsPerMinute: rate }),
     };
   },
   pulse: ({ beatsPerMinute }) => {
@@ -145,7 +148,9 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
     return value === null ? null : { kind: 'temperature', celsius: value };
   },
   urine: ({ protein, acetone, volumeMl }) => {
-    const proteinGrade = optional(protein, integer<0 | 1 | 2 | 3 | 4>(0, 4));
+    const proteinGrade = optional(protein, (value) =>
+      value === 'trace' ? 'trace' : integer<0 | 1 | 2 | 3 | 4>(0, 4)(value),
+    );
     const acetoneGrade = optional(acetone, integer<0 | 1 | 2 | 3 | 4>(0, 4));
     const volume = optional(volumeMl, number(0, 5_000));
     if (proteinGrade === null || acetoneGrade === null || volume === null) return null;

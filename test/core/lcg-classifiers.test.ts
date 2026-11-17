@@ -15,11 +15,10 @@ describe('classifySupportiveCare', () => {
     ['companion', 'companion-absent'],
     ['pain-relief', 'pain-relief-absent'],
     ['oral-fluid', 'oral-fluid-absent'],
-  ] as const)('flags %s not given, but not yes, declined or unknown', (kind, code) => {
+  ] as const)('flags %s not given, but not yes or declined', (kind, code) => {
     expect(classifySupportiveCare(kind, 'no')).toEqual({ code, severity: 'watch' });
     expect(classifySupportiveCare(kind, 'yes')).toBeNull();
     expect(classifySupportiveCare(kind, 'declined')).toBeNull();
-    expect(classifySupportiveCare(kind, 'unknown')).toBeNull();
   });
 
   it('flags a supine posture only', () => {

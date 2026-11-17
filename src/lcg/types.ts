@@ -3,11 +3,15 @@ import type { ScheduledCheck } from '../core/schedule.js';
 import type { Instant, Reading, ReadingIssue, ReadingKind, ReadingOfKind } from '../core/types.js';
 import type { LabourCareCheck, LabourCareGuideRuleOverrides } from './rules.js';
 
+/** How labour started, as on the form: on its own or induced by any means. */
+export type LabourOnset = 'spontaneous' | 'induced';
+
 /** What `buildLabourCareGuide` needs; episode facts are optional and passed through to the header. */
 export interface LabourCareGuideInput {
   readonly readings: readonly Reading[];
   readonly parity?: number | null;
-  readonly labourOnsetAt?: Instant | null;
+  readonly labourOnset?: LabourOnset | null;
+  readonly membranesRuptured?: boolean | null;
   readonly membranesRupturedAt?: Instant | null;
   readonly riskFactors?: readonly string[];
   readonly pushingAt?: Instant | null;
@@ -19,15 +23,16 @@ export interface LabourCareGuideInput {
 /** Section 1 of the guide; a missing or invalid fact is `null`. */
 export interface LabourCareGuideHeader {
   readonly parity: number | null;
-  readonly labourOnsetAt: string | null;
+  readonly labourOnset: LabourOnset | null;
   readonly activeLabourAt: string;
+  readonly membranesRuptured: boolean | null;
   readonly membranesRupturedAt: string | null;
   readonly riskFactors: readonly string[];
   readonly pushingAt: string | null;
   readonly birthAt: string | null;
 }
 
-/** Time spent at one whole centimetre of dilatation and whether it reached its alert limit. */
+/** Time at one whole centimetre: `limitReached` asks for an exam, `delayed` means an exam showed no progress. */
 export interface CentimetreProgress {
   readonly dilatationCm: number;
   readonly reachedAt: string;
@@ -35,7 +40,9 @@ export interface CentimetreProgress {
   readonly hours: number;
   readonly limitHours: number;
   readonly alertAt: string;
+  readonly limitReached: boolean;
   readonly delayed: boolean;
+  readonly delayedAt: string | null;
 }
 
 /** Time since full dilatation, when pushing began, and whether it reached the parity limit. */

@@ -4,6 +4,9 @@ export type Instant = Date | number | string;
 /** Urine dipstick result: 0 is negative, 1 to 4 are plus signs. */
 export type DipstickGrade = 0 | 1 | 2 | 3 | 4;
 
+/** Urine protein dipstick result: a grade, or `trace` between negative and 1+. */
+export type ProteinResult = DipstickGrade | 'trace';
+
 /** Membranes and liquor as charted: intact, ruptured, clear, meconium-stained, blood-stained or absent. */
 export type AmnioticFluid = 'intact' | 'ruptured' | 'clear' | 'meconium' | 'blood' | 'absent';
 
@@ -16,8 +19,8 @@ export type MeconiumGrade = 1 | 2 | 3;
 /** Caput succedaneum: 0 none, 1 is +, 2 is ++, 3 is +++. */
 export type CaputGrade = 0 | 1 | 2 | 3;
 
-/** Whether supportive care was given: `declined` means the woman did not want it. */
-export type SupportiveCareAnswer = 'yes' | 'no' | 'declined' | 'unknown';
+/** Whether supportive care was given (Y, N or D): `declined` means the woman did not want it. */
+export type SupportiveCareAnswer = 'yes' | 'no' | 'declined';
 
 /** The woman's posture: lying supine or mobile (upright, walking or any position she chooses). */
 export type Posture = 'supine' | 'mobile';
@@ -82,18 +85,20 @@ export interface OxytocinReading extends ReadingBase {
   readonly dropsPerMinute: number;
 }
 
-/** A medicine given. */
+/** A medicine given, with its dose and route (for example IM or oral). */
 export interface DrugReading extends ReadingBase {
   readonly kind: 'drug';
   readonly name: string;
   readonly dose?: string;
+  readonly route?: string;
 }
 
-/** An intravenous fluid given. */
+/** An intravenous fluid given, with its volume and infusion rate in drops per minute. */
 export interface IvFluidReading extends ReadingBase {
   readonly kind: 'iv-fluid';
   readonly name: string;
   readonly volumeMl?: number;
+  readonly dropsPerMinute?: number;
 }
 
 /** Maternal pulse in beats per minute. */
@@ -118,7 +123,7 @@ export interface TemperatureReading extends ReadingBase {
 /** Urine passed: dipstick protein and acetone, and volume. */
 export interface UrineReading extends ReadingBase {
   readonly kind: 'urine';
-  readonly protein?: DipstickGrade;
+  readonly protein?: ProteinResult;
   readonly acetone?: DipstickGrade;
   readonly volumeMl?: number;
 }
