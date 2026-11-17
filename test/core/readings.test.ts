@@ -110,6 +110,11 @@ describe('normalizeReadings', () => {
       'invalid-value',
     ],
     [
+      'an IV fluid running over 200 drops per minute',
+      { kind: 'iv-fluid', at, name: 'Saline', dropsPerMinute: 250 },
+      'invalid-value',
+    ],
+    [
       'an IV fluid with a negative volume',
       { kind: 'iv-fluid', at, name: 'Ringer lactate', volumeMl: -5 },
       'invalid-value',
@@ -197,7 +202,7 @@ describe('normalizeReadings', () => {
       { kind: 'contractions', at, per10Minutes: 3, durationSeconds: 45 },
       { kind: 'oxytocin', at, unitsPerLitre: 5, dropsPerMinute: 10 },
       { kind: 'drug', at, name: 'Pethidine' },
-      { kind: 'iv-fluid', at, name: 'Saline', volumeMl: 500 },
+      { kind: 'iv-fluid', at, name: 'Saline', volumeMl: 500, dropsPerMinute: 40 },
       { kind: 'pulse', at, beatsPerMinute: 84 },
       { kind: 'blood-pressure', at, systolic: 120, diastolic: 80 },
       { kind: 'temperature', at, celsius: 36.8 },

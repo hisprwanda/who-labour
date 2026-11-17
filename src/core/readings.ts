@@ -120,14 +120,16 @@ const PARSERS: { readonly [K in ReadingKind]: (fields: Fields) => PayloadOf<K> |
       ...(drugRoute === undefined ? {} : { route: drugRoute }),
     };
   },
-  'iv-fluid': ({ name, volumeMl }) => {
+  'iv-fluid': ({ name, volumeMl, dropsPerMinute }) => {
     const fluidName = text(name);
     const volume = optional(volumeMl, number(0, 10_000));
-    if (fluidName === null || volume === null) return null;
+    const rate = optional(dropsPerMinute, number(0, 200));
+    if (fluidName === null || volume === null || rate === null) return null;
     return {
       kind: 'iv-fluid',
       name: fluidName,
       ...(volume === undefined ? {} : { volumeMl: volume }),
+      ...(rate === undefined ? {} : { dropsPerMinute: rate }),
     };
   },
   pulse: ({ beatsPerMinute }) => {

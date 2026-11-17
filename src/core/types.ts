@@ -93,11 +93,12 @@ export interface DrugReading extends ReadingBase {
   readonly route?: string;
 }
 
-/** An intravenous fluid given. */
+/** An intravenous fluid given, with its volume and infusion rate in drops per minute. */
 export interface IvFluidReading extends ReadingBase {
   readonly kind: 'iv-fluid';
   readonly name: string;
   readonly volumeMl?: number;
+  readonly dropsPerMinute?: number;
 }
 
 /** Maternal pulse in beats per minute. */
