@@ -1,6 +1,6 @@
 {
   "name": "@hisprwanda/who-labour",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "WHO labour monitoring for JavaScript and TypeScript: the WHO modified partograph with alert and action lines, and the WHO Labour Care Guide with time limits per centimetre, findings and due checks.",
   "keywords": [
     "who",
