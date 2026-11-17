@@ -281,6 +281,19 @@ describe('second stage', () => {
 });
 
 describe('due checks', () => {
+  it('checks urine every 4 hours', () => {
+    const guide = build({
+      readings: [cervix(0, 5), { kind: 'urine', at: hour(1), protein: 0, acetone: 0 }],
+      now: hour(2),
+    });
+    expect(guide.due.find((check) => check.check === 'urine')).toMatchObject({
+      intervalMinutes: 240,
+      lastAt: hour(1),
+      nextDueAt: hour(5),
+      minutesOverdue: 0,
+    });
+  });
+
   it('checks maternal pulse every 4 hours, as the user manual says', () => {
     const guide = build({
       readings: [cervix(0, 5), { kind: 'pulse', at: hour(0), beatsPerMinute: 88 }],

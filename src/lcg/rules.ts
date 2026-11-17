@@ -21,6 +21,7 @@ export type LabourCareCheck =
   | 'pulse'
   | 'blood-pressure'
   | 'temperature'
+  | 'urine'
   | 'vaginal-exam'
   | 'companion'
   | 'pain-relief'
@@ -92,7 +93,7 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     secondStageMinimumHours: 3,
     secondStageColumnMinutes: 60,
   },
-  // LCG manual 2020 Tables 3 to 6: FHR and contractions every 30 min, supportive care hourly, pulse, BP, temperature and exams every 4 h.
+  // LCG manual 2020 Tables 3 to 6: FHR and contractions every 30 min, supportive care hourly, pulse, BP, temperature, urine and exams every 4 h.
   firstStageMinutes: {
     'fetal-heart-rate': 30,
     decelerations: 30,
@@ -100,6 +101,7 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     pulse: 240,
     'blood-pressure': 240,
     temperature: 240,
+    urine: 240,
     'vaginal-exam': 240,
     companion: 60,
     'pain-relief': 60,
@@ -114,6 +116,7 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     pulse: 240,
     'blood-pressure': 240,
     temperature: 240,
+    urine: 240,
     'vaginal-exam': null,
     companion: 60,
     'pain-relief': 60,

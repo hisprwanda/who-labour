@@ -66,6 +66,7 @@ const CHECK_READING: Readonly<Record<LabourCareCheck, ReadingKind>> = {
   pulse: 'pulse',
   'blood-pressure': 'blood-pressure',
   temperature: 'temperature',
+  urine: 'urine',
   'vaginal-exam': 'cervix',
   companion: 'companion',
   'pain-relief': 'pain-relief',
