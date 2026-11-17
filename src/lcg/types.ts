@@ -11,6 +11,7 @@ export interface LabourCareGuideInput {
   readonly readings: readonly Reading[];
   readonly parity?: number | null;
   readonly labourOnset?: LabourOnset | null;
+  readonly membranesRuptured?: boolean | null;
   readonly membranesRupturedAt?: Instant | null;
   readonly riskFactors?: readonly string[];
   readonly pushingAt?: Instant | null;
@@ -24,6 +25,7 @@ export interface LabourCareGuideHeader {
   readonly parity: number | null;
   readonly labourOnset: LabourOnset | null;
   readonly activeLabourAt: string;
+  readonly membranesRuptured: boolean | null;
   readonly membranesRupturedAt: string | null;
   readonly riskFactors: readonly string[];
   readonly pushingAt: string | null;

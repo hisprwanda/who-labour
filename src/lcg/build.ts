@@ -214,6 +214,7 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
   const parity = validParity(input.parity);
   const birthAt = optionalInstant(input.birthAt, now);
   const pushingAt = optionalInstant(input.pushingAt, now);
+  const rupturedAt = optionalInstant(input.membranesRupturedAt, now);
   const end = birthAt === null ? now : Math.max(startedAt, birthAt);
   const cervixReadings = charted.filter(isCervix);
   const full = cervixReadings.find((reading) => reading.dilatationCm >= fullDilatationCm);
@@ -281,7 +282,13 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
       parity,
       labourOnset: validOnset(input.labourOnset),
       activeLabourAt: start.at,
-      membranesRupturedAt: nullableIso(optionalInstant(input.membranesRupturedAt, now)),
+      membranesRuptured:
+        rupturedAt !== null
+          ? true
+          : typeof input.membranesRuptured === 'boolean'
+            ? input.membranesRuptured
+            : null,
+      membranesRupturedAt: nullableIso(rupturedAt),
       riskFactors: (input.riskFactors ?? [])
         .filter((factor): factor is string => typeof factor === 'string')
         .map((factor) => factor.trim())

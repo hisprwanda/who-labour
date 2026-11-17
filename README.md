@@ -107,8 +107,10 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
 - **Second stage.** It starts at the first 10 cm reading. `second-stage-prolonged` is reported after
   3 hours for a nulliparous woman (`parity: 0`) and 2 hours otherwise. A missing or invalid parity
   uses the stricter 2 hours.
-- **Episode facts.** `parity`, `labourOnset` (`spontaneous` or `induced`), `membranesRupturedAt`,
-  `riskFactors`, `pushingAt` and `birthAt` are optional and go into `header`. An invalid or future value becomes `null`; it
+- **Episode facts.** `parity`, `labourOnset` (`spontaneous` or `induced`), `membranesRuptured`,
+  `membranesRupturedAt`, `riskFactors`, `pushingAt` and `birthAt` are optional and go into `header`.
+  A valid `membranesRupturedAt` sets `membranesRuptured` to `true`; `membranesRuptured: true` with no
+  time is the form's `U` (ruptured, time unknown). An invalid or future value becomes `null`; it
   never throws. `pushingAt` (the form's `P`) is also shown in `secondStage` and raises no alert.
   `birthAt` stops the clocks and the due checks.
 - **Grid.** `grid.firstStage` has hourly columns from the start, at least 12 hours long, as on the

@@ -55,6 +55,7 @@ describe('buildLabourCareGuide start', () => {
       parity: 0,
       labourOnset: 'induced',
       activeLabourAt: hour(0),
+      membranesRuptured: true,
       membranesRupturedAt: hour(-1),
       riskFactors: ['anaemia', 'previous caesarean'],
       pushingAt: null,
@@ -73,9 +74,17 @@ describe('buildLabourCareGuide start', () => {
     expect(guide.header).toMatchObject({
       parity: null,
       labourOnset: null,
+      membranesRuptured: null,
       membranesRupturedAt: null,
       riskFactors: [],
     });
+  });
+
+  it('records membranes ruptured at an unknown time, or still intact', () => {
+    const unknown = build({ readings: [cervix(0, 5)], membranesRuptured: true, now: hour(1) });
+    expect(unknown.header).toMatchObject({ membranesRuptured: true, membranesRupturedAt: null });
+    const intact = build({ readings: [cervix(0, 5)], membranesRuptured: false, now: hour(1) });
+    expect(intact.header).toMatchObject({ membranesRuptured: false, membranesRupturedAt: null });
   });
 
   it('throws a TypeError for an invalid now', () => {
