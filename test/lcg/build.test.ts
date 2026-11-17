@@ -279,6 +279,22 @@ describe('second stage', () => {
   });
 });
 
+describe('due checks', () => {
+  it('checks maternal pulse every 4 hours, as the user manual says', () => {
+    const guide = build({
+      readings: [cervix(0, 5), { kind: 'pulse', at: hour(0), beatsPerMinute: 88 }],
+      now: hour(5),
+    });
+    expect(guide.due.find((check) => check.check === 'pulse')).toEqual({
+      check: 'pulse',
+      intervalMinutes: 240,
+      lastAt: hour(0),
+      nextDueAt: hour(4),
+      minutesOverdue: 60,
+    });
+  });
+});
+
 describe('alert rows', () => {
   it('flags each Labour Care Guide alert with the reading that triggered it', () => {
     const at = hour(0.5);

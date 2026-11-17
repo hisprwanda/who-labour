@@ -92,12 +92,12 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     secondStageMinimumHours: 3,
     secondStageColumnMinutes: 60,
   },
-  // LCG 2021 half-hour cells for FHR and contractions, hourly cells otherwise; LCG manual 2020 for BP, temperature and exams (to verify).
+  // LCG manual 2020 Tables 3 to 6: FHR and contractions every 30 min, supportive care hourly, pulse, BP, temperature and exams every 4 h.
   firstStageMinutes: {
     'fetal-heart-rate': 30,
     decelerations: 30,
     contractions: 30,
-    pulse: 60,
+    pulse: 240,
     'blood-pressure': 240,
     temperature: 240,
     'vaginal-exam': 240,
@@ -106,12 +106,12 @@ export const WHO_LABOUR_CARE_GUIDE_RULES: LabourCareGuideRules = freezeRules({
     'oral-fluid': 60,
     posture: 60,
   },
-  // LCG manual 2020 (not on the form): fetal heart every 5 minutes in the second stage (others to verify).
+  // LCG manual 2020 Tables 4 to 6: FHR every 5 min, contractions every 30 min (pending), the rest as in the first stage.
   secondStageMinutes: {
     'fetal-heart-rate': 5,
     decelerations: 5,
     contractions: 30,
-    pulse: 60,
+    pulse: 240,
     'blood-pressure': 240,
     temperature: 240,
     'vaginal-exam': null,

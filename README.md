@@ -209,8 +209,8 @@ and must be checked by a clinician before the first release.
 | Fetal heart rate         | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
 | Decelerations            | every 30 min (every 5 min in stage 2)                                  | LCG 2021, LCG manual 2020 |
 | Contractions             | every 30 min                                                           | LCG 2021                  |
-| Pulse, supportive care   | every hour                                                             | LCG 2021                  |
-| Temperature, BP          | every 4 h                                                              | LCG manual 2020           |
+| Supportive care          | every hour                                                             | LCG manual 2020           |
+| Pulse, temperature, BP   | every 4 h                                                              | LCG manual 2020           |
 | Vaginal exam             | every 4 h in the first stage                                           | LCG manual 2020           |
 | Supportive care          | companion, pain relief or oral fluid `no`, not `declined` or `unknown` | LCG 2021                  |
 | Posture                  | supine                                                                 | LCG 2021                  |
