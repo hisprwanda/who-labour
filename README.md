@@ -61,8 +61,8 @@ const guide = buildLabourCareGuide({
 });
 
 if (guide.status !== 'not-started') {
-  guide.progress; // { dilatationCm: 7, hours: 3, limitHours: 3, delayed: true, ... }
-  guide.findings.map((finding) => finding.code); // ['companion-absent', 'cervix-progress-delayed']
+  guide.progress; // { dilatationCm: 7, hours: 3, limitHours: 3, limitReached: true, delayed: false, ... }
+  guide.findings.map((finding) => finding.code); // ['companion-absent']
 }
 ```
 
@@ -98,10 +98,12 @@ Steps 1, 2, 5 and 6 work the same way. The rest follows the LCG:
   from that exam.
 - **Time at each centimetre.** For each whole centimetre examined, `cervix` lists when it was
   reached, when it was left, the hours spent there and its limit (6, 5, 3, 2.5 and 2 hours at 5 to 9
-  cm). A later exam that reads lower never resets the clock. When the limit is reached,
-  `cervix-progress-delayed` is reported at the moment the limit passed, even before the next exam,
-  so a board can show it at `now`. `progress` is the current centimetre, or `null` once fully
-  dilated.
+  cm). A later exam that reads lower never resets the clock. Once the limit for the current
+  centimetre has passed, `limitReached` is `true`: it raises no alert and means an exam is worth
+  doing. `cervix-progress-delayed` is reported only when an exam at or after the limit shows no
+  progress, as the LCG says, dated at that exam with its `readingId`. An exam that shows progress
+  never raises it, however long the gap, so WHO's own worked example has no delay. `progress` is
+  the current centimetre, or `null` once fully dilated.
 - **Second stage.** It starts at the first 10 cm reading. `second-stage-prolonged` is reported after
   3 hours for a nulliparous woman (`parity: 0`) and 2 hours otherwise. A missing or invalid parity
   uses the stricter 2 hours.

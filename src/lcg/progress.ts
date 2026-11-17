@@ -3,37 +3,64 @@ import { MS_PER_HOUR, hoursBetween, toIsoString } from '../core/time.js';
 import type { LabourCareGuideRules } from './rules.js';
 import type { CentimetreProgress, SecondStageProgress } from './types.js';
 
-type CervixTimedReading = TimedReading & { readonly kind: 'cervix' };
+/** A cervix reading after validation. */
+export type CervixTimedReading = TimedReading & { readonly kind: 'cervix' };
 
-/** Time at each whole centimetre from the first active exam; a lower exam never resets the clock. */
+/** One centimetre's progress and the exam that showed no progress past its limit, if any. */
+export interface CentimetreLevel {
+  readonly progress: CentimetreProgress;
+  readonly delayExam: CervixTimedReading | null;
+}
+
+interface OpenLevel {
+  readonly cm: number;
+  readonly reachedAt: number;
+  readonly alertAt: number;
+  leftAt: number | null;
+  delayExam: CervixTimedReading | null;
+}
+
+/** Time at each whole centimetre; a delay needs an exam at or past the limit that shows no progress. */
 export function centimetreProgress(
   cervix: readonly CervixTimedReading[],
   end: number,
   rules: LabourCareGuideRules,
-): CentimetreProgress[] {
+): CentimetreLevel[] {
   const { fullDilatationCm } = rules.cervix;
-  const levels: { cm: number; reachedAt: number; leftAt: number | null }[] = [];
+  const levels: OpenLevel[] = [];
+  const open = (reading: CervixTimedReading, cm: number): void => {
+    const alertAt = reading.time + (rules.cervixAlertHours[cm] ?? 0) * MS_PER_HOUR;
+    levels.push({ cm, reachedAt: reading.time, alertAt, leftAt: null, delayExam: null });
+  };
   for (const reading of cervix) {
     const cm = Math.floor(reading.dilatationCm);
     const current = levels.at(-1);
-    if (current !== undefined && (current.leftAt !== null || cm <= current.cm)) continue;
-    if (current !== undefined) current.leftAt = reading.time;
-    if (reading.dilatationCm < fullDilatationCm)
-      levels.push({ cm, reachedAt: reading.time, leftAt: null });
+    if (current === undefined) {
+      if (reading.dilatationCm < fullDilatationCm) open(reading, cm);
+      continue;
+    }
+    if (current.leftAt !== null) continue;
+    if (cm > current.cm) {
+      current.leftAt = reading.time;
+      if (reading.dilatationCm < fullDilatationCm) open(reading, cm);
+    } else if (current.delayExam === null && reading.time >= current.alertAt) {
+      current.delayExam = reading;
+    }
   }
-  return levels.map(({ cm, reachedAt, leftAt }) => {
-    const limitHours = rules.cervixAlertHours[cm] ?? 0;
-    const alertAt = reachedAt + limitHours * MS_PER_HOUR;
-    return {
+  return levels.map(({ cm, reachedAt, alertAt, leftAt, delayExam }) => ({
+    progress: {
       dilatationCm: cm,
       reachedAt: toIsoString(reachedAt),
       leftAt: leftAt === null ? null : toIsoString(leftAt),
       hours: hoursBetween(reachedAt, leftAt ?? end),
-      limitHours,
+      limitHours: rules.cervixAlertHours[cm] ?? 0,
       alertAt: toIsoString(alertAt),
-      delayed: (leftAt ?? end) >= alertAt,
-    };
-  });
+      limitReached: leftAt === null && end >= alertAt,
+      delayed: delayExam !== null,
+      delayedAt: delayExam?.at ?? null,
+    },
+    delayExam,
+  }));
 }
 
 /** Time since full dilatation against the parity limit; unknown parity uses the stricter multiparous limit. */

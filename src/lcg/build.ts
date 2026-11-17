@@ -35,7 +35,7 @@ import {
   type LabourCareCheck,
   type LabourCareGuideRules,
 } from './rules.js';
-import { centimetreProgress, secondStageProgress } from './progress.js';
+import { centimetreProgress, secondStageProgress, type CervixTimedReading } from './progress.js';
 import type {
   LabourCareGrid,
   LabourCareGuide,
@@ -43,8 +43,6 @@ import type {
   LabourCareRows,
   LabourCareSections,
 } from './types.js';
-
-type CervixTimedReading = TimedReading & { readonly kind: 'cervix' };
 
 const SECTIONS: { readonly [S in keyof LabourCareSections]: readonly LabourCareSections[S][] } = {
   supportiveCare: ['companion', 'pain-relief', 'oral-fluid', 'posture'],
@@ -213,7 +211,8 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
   const end = birthAt === null ? now : Math.max(startedAt, birthAt);
   const cervixReadings = charted.filter(isCervix);
   const full = cervixReadings.find((reading) => reading.dilatationCm >= fullDilatationCm);
-  const cervix = centimetreProgress(cervixReadings, end, rules);
+  const levels = centimetreProgress(cervixReadings, end, rules);
+  const cervix = levels.map((level) => level.progress);
   const secondStage =
     full === undefined
       ? null
@@ -245,15 +244,20 @@ export function buildLabourCareGuide(input: LabourCareGuideInput): LabourCareGui
         ...(reading.id === undefined ? {} : { readingId: reading.id }),
       })),
     ),
-    ...cervix
-      .filter((level) => level.delayed)
-      .map((level) =>
-        findingAt(
-          { code: 'cervix-progress-delayed', severity: 'watch' },
-          Date.parse(level.alertAt),
-          startedAt,
-        ),
-      ),
+    ...levels.flatMap(({ delayExam }) =>
+      delayExam === null
+        ? []
+        : [
+            {
+              code: 'cervix-progress-delayed' as const,
+              severity: 'watch' as const,
+              kind: 'cervix' as const,
+              at: delayExam.at,
+              hour: (delayExam.time - startedAt) / MS_PER_HOUR,
+              ...(delayExam.id === undefined ? {} : { readingId: delayExam.id }),
+            },
+          ],
+    ),
     ...(secondStage?.prolonged === true
       ? [
           findingAt(

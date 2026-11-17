@@ -95,31 +95,48 @@ describe('time spent at each centimetre', () => {
     [7, 3],
     [8, 2.5],
     [9, 2],
-  ])('alerts at %i cm after %f hours without progress', (cm, limit) => {
-    const before = build({ readings: [cervix(0, cm)], now: hour(limit - 0.1) });
-    expect(codes(before)).toEqual([]);
-    expect(before.progress).toMatchObject({ dilatationCm: cm, delayed: false });
+  ])(
+    'at %i cm asks for an exam after %f hours and alerts when it shows no progress',
+    (cm, limit) => {
+      const before = build({ readings: [cervix(0, cm)], now: hour(limit - 0.1) });
+      expect(codes(before)).toEqual([]);
+      expect(before.progress).toMatchObject({ limitReached: false, delayed: false });
 
-    const at = build({ readings: [cervix(0, cm, 'exam-1')], now: hour(limit) });
-    expect(at.findings).toEqual([
-      {
-        code: 'cervix-progress-delayed',
-        severity: 'watch',
-        kind: 'cervix',
-        at: hour(limit),
-        hour: limit,
-      },
-    ]);
-    expect(at.progress).toEqual({
-      dilatationCm: cm,
-      reachedAt: hour(0),
-      leftAt: null,
-      hours: limit,
-      limitHours: limit,
-      alertAt: hour(limit),
-      delayed: true,
-    });
-  });
+      const due = build({ readings: [cervix(0, cm)], now: hour(limit) });
+      expect(codes(due)).toEqual([]);
+      expect(due.progress).toEqual({
+        dilatationCm: cm,
+        reachedAt: hour(0),
+        leftAt: null,
+        hours: limit,
+        limitHours: limit,
+        alertAt: hour(limit),
+        limitReached: true,
+        delayed: false,
+        delayedAt: null,
+      });
+
+      const same = build({
+        readings: [cervix(0, cm), cervix(limit, cm, 'exam-2')],
+        now: hour(limit + 0.5),
+      });
+      expect(same.findings).toEqual([
+        {
+          code: 'cervix-progress-delayed',
+          severity: 'watch',
+          kind: 'cervix',
+          at: hour(limit),
+          hour: limit,
+          readingId: 'exam-2',
+        },
+      ]);
+      expect(same.progress).toMatchObject({
+        limitReached: true,
+        delayed: true,
+        delayedAt: hour(limit),
+      });
+    },
+  );
 
   it('charts a normal labour with no delay', () => {
     const guide = build({
@@ -138,18 +155,33 @@ describe('time spent at each centimetre', () => {
     expect(guide.findings).toEqual([]);
   });
 
-  it('flags a delay seen only at the next exam, at the time the limit was reached', () => {
+  it('does not alert when the next exam shows progress, even after the limit', () => {
     const guide = build({ readings: [cervix(0, 7), cervix(4, 8)], now: hour(4) });
     expect(guide.cervix[0]).toMatchObject({
       dilatationCm: 7,
       leftAt: hour(4),
       hours: 4,
-      delayed: true,
+      limitReached: false,
+      delayed: false,
+    });
+    expect(guide.findings).toEqual([]);
+    expect(guide.progress).toMatchObject({ dilatationCm: 8, alertAt: hour(6.5) });
+  });
+
+  it('does not alert on an exam with no progress before the limit', () => {
+    const guide = build({ readings: [cervix(0, 7), cervix(2, 7)], now: hour(2.5) });
+    expect(guide.findings).toEqual([]);
+    expect(guide.progress).toMatchObject({ limitReached: false, delayed: false });
+  });
+
+  it('alerts once, at the first exam past the limit with no progress', () => {
+    const guide = build({
+      readings: [cervix(0, 9), cervix(2, 9, 'first'), cervix(3, 9, 'second')],
+      now: hour(3),
     });
     expect(guide.findings).toMatchObject([
-      { code: 'cervix-progress-delayed', at: hour(3), hour: 3 },
+      { code: 'cervix-progress-delayed', at: hour(2), readingId: 'first' },
     ]);
-    expect(guide.progress).toMatchObject({ dilatationCm: 8, delayed: false, alertAt: hour(6.5) });
   });
 
   it('counts a fractional dilatation at its whole centimetre', () => {
@@ -160,8 +192,8 @@ describe('time spent at each centimetre', () => {
     ]);
   });
 
-  it('does not reset the clock when a later exam reads lower', () => {
-    const guide = build({ readings: [cervix(0, 7), cervix(2, 6)], now: hour(3) });
+  it('does not reset the clock when a later exam reads lower, and counts it as no progress', () => {
+    const guide = build({ readings: [cervix(0, 7), cervix(3, 6)], now: hour(3) });
     expect(guide.cervix).toHaveLength(1);
     expect(guide.progress).toMatchObject({ dilatationCm: 7, reachedAt: hour(0), delayed: true });
   });
@@ -371,7 +403,7 @@ describe('grid', () => {
 describe('rules overrides', () => {
   it('uses a local start and per-centimetre limit', () => {
     const guide = build({
-      readings: [cervix(0, 4)],
+      readings: [cervix(0, 4), cervix(8, 4)],
       rules: { cervix: { activePhaseFromCm: 4 }, cervixAlertHours: { 4: 8 } },
       now: hour(8),
     });

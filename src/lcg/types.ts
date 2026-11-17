@@ -27,7 +27,7 @@ export interface LabourCareGuideHeader {
   readonly birthAt: string | null;
 }
 
-/** Time spent at one whole centimetre of dilatation and whether it reached its alert limit. */
+/** Time at one whole centimetre: `limitReached` asks for an exam, `delayed` means an exam showed no progress. */
 export interface CentimetreProgress {
   readonly dilatationCm: number;
   readonly reachedAt: string;
@@ -35,7 +35,9 @@ export interface CentimetreProgress {
   readonly hours: number;
   readonly limitHours: number;
   readonly alertAt: string;
+  readonly limitReached: boolean;
   readonly delayed: boolean;
+  readonly delayedAt: string | null;
 }
 
 /** Time since full dilatation, when pushing began, and whether it reached the parity limit. */
